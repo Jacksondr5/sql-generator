@@ -19,7 +19,7 @@ namespace Core.Test
         {
             _classInfo = new ClassInfo
             {
-                ClassName = "TestClass",
+                CSharpClassName = "TestClass",
                 Properties = new List<PropertyInfo>
                 {
                     new PropertyInfo

@@ -9,15 +9,16 @@ namespace Core
 {
     public class ClassInspector
     {
+        private const string _idPropertyName = "Id";
         public static ClassInfo GetFieldInfoFromType(
             Type type,
             bool includeInternalProperties = false,
             bool includePrivateProperties = false
         )
         {
-            return new ClassInfo
+            var info = new ClassInfo
             {
-                ClassName = type.Name,
+                CSharpClassName = type.Name,
                 Properties = type
                     .GetProperties(
                         BindingFlags.Public |
@@ -43,9 +44,22 @@ namespace Core
                                 "unknown C# type"
                             )
                         },
+                        IsIdProperty =
+                            x.Name.Equals(_idPropertyName)
                     })
-                    .ToList()
+                    .ToList(),
+                SqlClassName = type.Name.ToSnakeCase()
             };
+            if (!info.Properties.Any(x => x.IsIdProperty))
+                throw new InvalidInputException(
+                    InvalidInputExceptionNoIdProperty(info.CSharpClassName)
+                );
+            //Result of Find is not null due to the Any check above
+            if (info.Properties.Find(x => x.IsIdProperty)!.CSharpType != ValidType.Int)
+                throw new InvalidInputException(
+                    InvalidInputExceptionIdPropertyNotInt(info.CSharpClassName)
+                );
+            return info;
         }
 
         private static bool FilterProperty(
@@ -60,19 +74,28 @@ namespace Core
             return getMethod.IsPublic ||
                 (includePrivateProperties && getMethod.IsPrivate);
         }
+
+        public static string InvalidInputExceptionIdPropertyNotInt(
+            string className
+        ) => $"The class {className} has an ID property that is not an int";
+        public static string InvalidInputExceptionNoIdProperty(
+            string className
+        ) => $"The class {className} has no Id property";
     }
 
     public class ClassInfo
     {
-        public string ClassName { get; set; } = "";
+        public string CSharpClassName { get; set; } = "";
         public List<PropertyInfo> Properties { get; set; } =
             new List<PropertyInfo>();
+        public string SqlClassName { get; set; } = "";
     }
 
     public class PropertyInfo
     {
         public string CSharpName { get; set; } = "";
         public ValidType CSharpType { get; set; }
+        public bool IsIdProperty { get; set; }
         public int Length { get; set; }
         public int Precision { get; set; }
         public int Scale { get; set; }

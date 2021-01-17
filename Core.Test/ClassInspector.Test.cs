@@ -11,26 +11,29 @@ namespace Core.Test
     public class ClassInspectorTest
     {
         [TestMethod]
-        public void GetFieldInfoFromType_ShouldMapCSharpName()
+        public void GetFieldInfoFromType_ShouldPropertyMapCSharpName()
         {
             //Assemble
             var expected = "PublicTestString";
 
             //Act
             var actual = ClassInspector
-                .GetFieldInfoFromType(typeof(SimpleTestType));
+                .GetFieldInfoFromType(typeof(SimpleTestClass));
 
             //Assert
-            actual.Properties.First().CSharpName.Should().Be(expected);
+            actual.Properties
+                .First(x => x.CSharpType == ValidType.String).CSharpName
+                .Should()
+                .Be(expected);
         }
 
         [DataTestMethod]
         [ValidTypeDataSource]
-        public void GetFieldInfoFromType_ShouldMapCSharpType(ValidType expected)
+        public void GetFieldInfoFromType_ShouldPropertyMapCSharpType(ValidType expected)
         {
             //Act
             var actual = ClassInspector
-                .GetFieldInfoFromType(typeof(AllValidValuesTestType));
+                .GetFieldInfoFromType(typeof(AllValidValuesTestClass));
 
             //Assert
             actual.Properties
@@ -51,7 +54,7 @@ namespace Core.Test
 
             //Act
             var actual =
-                ClassInspector.GetFieldInfoFromType(typeof(SimpleTestType));
+                ClassInspector.GetFieldInfoFromType(typeof(SimpleTestClass));
 
             //Assert
             actual.Properties.Should().NotContain(privateProperty);
@@ -65,7 +68,7 @@ namespace Core.Test
 
             //Act
             var actual = ClassInspector.GetFieldInfoFromType(
-                typeof(SimpleTestType),
+                typeof(SimpleTestClass),
                 includePrivateProperties: true
             );
 
@@ -76,16 +79,105 @@ namespace Core.Test
                 .Should()
                 .ContainEquivalentOf(expected);
         }
+
+        [TestMethod]
+        public void GetFieldInfoFromType_ShouldSetClassSqlName()
+        {
+            //Assemble
+            var expected = "simple_test_class";
+
+            //Act
+            var actual = ClassInspector.GetFieldInfoFromType(
+                typeof(SimpleTestClass)
+            );
+
+            //Assert
+            actual.SqlClassName.Should().Be(expected);
+        }
+
+        [TestMethod]
+        public void GetFieldInfoFromType_ShouldSetClassCSharpName()
+        {
+            //Assemble
+            var expected = "SimpleTestClass";
+
+            //Act
+            var actual = ClassInspector.GetFieldInfoFromType(
+                typeof(SimpleTestClass)
+            );
+
+            //Assert
+            actual.CSharpClassName.Should().Be(expected);
+        }
+
+        [TestMethod]
+        public void GetFieldInfoFromType_ShouldSetFlagOnIdProperty()
+        {
+            //Act
+            var actual = ClassInspector.GetFieldInfoFromType(
+                typeof(SimpleTestClass)
+            );
+
+            //Assert
+            actual.Properties
+                .Should()
+                .Contain(x => x.IsIdProperty && x.CSharpName.Equals("Id"));
+        }
+
+        [TestMethod]
+        public void GetFieldInfoFromType_NoIdPropertyPresent_ShouldThrowException()
+        {
+            //Act
+            Action act = () => ClassInspector.GetFieldInfoFromType(
+                typeof(MissingIdTestClass)
+            );
+
+            //Assert
+            act
+                .Should()
+                .ThrowExactly<InvalidInputException>()
+                .WithMessage(ClassInspector.InvalidInputExceptionNoIdProperty(
+                    "MissingIdTestClass"
+                ));
+        }
+
+        [TestMethod]
+        public void GetFieldInfoFromType_IdPropertyIsNotInt_ShouldThrowException()
+        {
+            //Act
+            Action act = () => ClassInspector.GetFieldInfoFromType(
+                typeof(InvalidIdTestClass)
+            );
+
+            //Assert
+            act
+                .Should()
+                .ThrowExactly<InvalidInputException>()
+                .WithMessage(
+                    ClassInspector.InvalidInputExceptionIdPropertyNotInt(
+                        "InvalidIdTestClass"
+                    )
+                );
+        }
     }
 
-    internal class SimpleTestType
+    internal class SimpleTestClass
     {
+        public int Id { get; set; }
         public string PublicTestString { get; set; }
         private string PrivateTestString { get; set; }
     }
 
-    internal class AllValidValuesTestType
+    internal class InvalidIdTestClass
     {
+        public string Id { get; set; }
+    }
+
+    internal class MissingIdTestClass { }
+
+    internal class AllValidValuesTestClass
+    {
+        public int Id { get; set; }
         public int Int { get; set; }
         public bool Bool { get; set; }
         public decimal Decimal { get; set; }

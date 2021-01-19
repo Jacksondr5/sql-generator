@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ConsoleApp": {
+      "commandName": "Project",
+      "commandLineArgs": "--assembly-path E:\\Repos\\sql-generator\\Test\\bin\\Debug\\net5.0\\Test.dll --class-name \"Test.TestClass\""
+    }
+  }
+}

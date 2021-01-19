@@ -12,7 +12,6 @@ namespace Core
         private const string _idPropertyName = "Id";
         public static ClassInfo GetFieldInfoFromType(
             Type type,
-            bool includeInternalProperties = false,
             bool includePrivateProperties = false
         )
         {
@@ -27,7 +26,6 @@ namespace Core
                     )
                     .Where(x => FilterProperty(
                         x,
-                        includeInternalProperties,
                         includePrivateProperties
                     ))
                     .Select(x => new PropertyInfo
@@ -64,7 +62,6 @@ namespace Core
 
         private static bool FilterProperty(
             System.Reflection.PropertyInfo property,
-            bool includeInternalProperties,
             bool includePrivateProperties
         )
         {

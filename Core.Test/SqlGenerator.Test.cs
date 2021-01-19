@@ -9,6 +9,7 @@ namespace Core.Test
     [TestClass]
     public class SqlGeneratorTest
     {
+        private static readonly string _nl = Environment.NewLine;
         private static readonly ClassInfo _info = new ClassInfo
         {
             CSharpClassName = "TestClass",
@@ -48,24 +49,24 @@ namespace Core.Test
             var idProperty = _info.Properties[0];
             var builder = new StringBuilder();
             builder.Append(
-                $"CREATE OR ALTER PROCEDURE {_schema}.{_info.SqlClassName}_get_by_id\n"
+                $"CREATE OR ALTER PROCEDURE {_schema}.{_info.SqlClassName}_get_by_id{_nl}"
             );
-            builder.Append($"\t@{idProperty.SqlName} {idProperty.SqlType}\n");
-            builder.Append("AS\n");
-            builder.Append("BEGIN\n");
-            builder.Append("\tSELECT\n");
+            builder.Append($"\t@{idProperty.SqlName} {idProperty.SqlType}{_nl}");
+            builder.Append($"AS{_nl}");
+            builder.Append($"BEGIN{_nl}");
+            builder.Append($"\tSELECT{_nl}");
             builder.Append(
-                $"\t\t[{idProperty.CSharpName}] = [{idProperty.SqlName}],\n"
-            );
-            builder.Append(
-                $"\t\t[{_info.Properties[1].CSharpName}] = [{_info.Properties[1].SqlName}],\n"
+                $"\t\t[{idProperty.CSharpName}] = [{idProperty.SqlName}],{_nl}"
             );
             builder.Append(
-                $"\t\t[{_info.Properties[2].CSharpName}] = [{_info.Properties[2].SqlName}]\n"
+                $"\t\t[{_info.Properties[1].CSharpName}] = [{_info.Properties[1].SqlName}],{_nl}"
             );
-            builder.Append($"\tFROM {_schema}.{_info.SqlClassName}\n");
             builder.Append(
-                $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}\n"
+                $"\t\t[{_info.Properties[2].CSharpName}] = [{_info.Properties[2].SqlName}]{_nl}"
+            );
+            builder.Append($"\tFROM {_schema}.{_info.SqlClassName}{_nl}");
+            builder.Append(
+                $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}{_nl}"
             );
             builder.Append("END");
             var expected = builder.ToString();
@@ -83,26 +84,26 @@ namespace Core.Test
             //Assemble
             var builder = new StringBuilder();
             builder.Append(
-                $"CREATE OR ALTER PROCEDURE {_schema}.{_info.SqlClassName}_create\n"
+                $"CREATE OR ALTER PROCEDURE {_schema}.{_info.SqlClassName}_create{_nl}"
             );
             builder.Append(
-                $"\t@{_info.Properties[1].SqlName} {_info.Properties[1].SqlType},\n"
+                $"\t@{_info.Properties[1].SqlName} {_info.Properties[1].SqlType},{_nl}"
             );
             builder.Append(
-                $"\t@{_info.Properties[2].SqlName} {_info.Properties[2].SqlType}\n"
+                $"\t@{_info.Properties[2].SqlName} {_info.Properties[2].SqlType}{_nl}"
             );
-            builder.Append("AS\n");
-            builder.Append("BEGIN\n");
-            builder.Append($"\tINSERT {_schema}.{_info.SqlClassName} (\n");
-            builder.Append($"\t\t{_info.Properties[1].SqlName},\n");
-            builder.Append($"\t\t{_info.Properties[2].SqlName}\n");
-            builder.Append("\t)\n");
-            builder.Append("\tVALUES (\n");
-            builder.Append($"\t\t@{_info.Properties[1].SqlName},\n");
-            builder.Append($"\t\t@{_info.Properties[2].SqlName}\n");
-            builder.Append("\t);\n");
-            builder.Append("\n");
-            builder.Append("\tSELECT SCOPE_IDENTITY()\n");
+            builder.Append($"AS{_nl}");
+            builder.Append($"BEGIN{_nl}");
+            builder.Append($"\tINSERT {_schema}.{_info.SqlClassName} ({_nl}");
+            builder.Append($"\t\t{_info.Properties[1].SqlName},{_nl}");
+            builder.Append($"\t\t{_info.Properties[2].SqlName}{_nl}");
+            builder.Append($"\t){_nl}");
+            builder.Append($"\tVALUES ({_nl}");
+            builder.Append($"\t\t@{_info.Properties[1].SqlName},{_nl}");
+            builder.Append($"\t\t@{_info.Properties[2].SqlName}{_nl}");
+            builder.Append($"\t);{_nl}");
+            builder.Append($"{_nl}");
+            builder.Append($"\tSELECT SCOPE_IDENTITY(){_nl}");
             builder.Append("END");
             var expected = builder.ToString();
 
@@ -120,27 +121,27 @@ namespace Core.Test
             var idProperty = _info.Properties[0];
             var builder = new StringBuilder();
             builder.Append(
-                $"CREATE OR ALTER PROCEDURE {_schema}.{_info.SqlClassName}_update\n"
+                $"CREATE OR ALTER PROCEDURE {_schema}.{_info.SqlClassName}_update{_nl}"
             );
-            builder.Append($"\t@{idProperty.SqlName} {idProperty.SqlType},\n");
+            builder.Append($"\t@{idProperty.SqlName} {idProperty.SqlType},{_nl}");
             builder.Append(
-                $"\t@{_info.Properties[1].SqlName} {_info.Properties[1].SqlType},\n"
-            );
-            builder.Append(
-                $"\t@{_info.Properties[2].SqlName} {_info.Properties[2].SqlType}\n"
-            );
-            builder.Append($"AS\n");
-            builder.Append($"BEGIN\n");
-            builder.Append($"\tUPDATE {_schema}.{_info.SqlClassName}\n");
-            builder.Append($"\tSET\n");
-            builder.Append(
-                $"\t\t[{_info.Properties[1].SqlName}] = @{_info.Properties[1].SqlName},\n"
+                $"\t@{_info.Properties[1].SqlName} {_info.Properties[1].SqlType},{_nl}"
             );
             builder.Append(
-                $"\t\t[{_info.Properties[2].SqlName}] = @{_info.Properties[2].SqlName}\n"
+                $"\t@{_info.Properties[2].SqlName} {_info.Properties[2].SqlType}{_nl}"
+            );
+            builder.Append($"AS{_nl}");
+            builder.Append($"BEGIN{_nl}");
+            builder.Append($"\tUPDATE {_schema}.{_info.SqlClassName}{_nl}");
+            builder.Append($"\tSET{_nl}");
+            builder.Append(
+                $"\t\t[{_info.Properties[1].SqlName}] = @{_info.Properties[1].SqlName},{_nl}"
             );
             builder.Append(
-                $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}\n"
+                $"\t\t[{_info.Properties[2].SqlName}] = @{_info.Properties[2].SqlName}{_nl}"
+            );
+            builder.Append(
+                $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}{_nl}"
             );
             builder.Append("END");
             var expected = builder.ToString();
@@ -159,15 +160,15 @@ namespace Core.Test
             var idProperty = _info.Properties[0];
             var builder = new StringBuilder();
             builder.Append(
-                $"CREATE OR ALTER PROCEDURE {_schema}.{_info.SqlClassName}_delete\n"
+                $"CREATE OR ALTER PROCEDURE {_schema}.{_info.SqlClassName}_delete{_nl}"
             );
-            builder.Append($"\t@{idProperty.SqlName} {idProperty.SqlType}\n");
-            builder.Append("AS\n");
-            builder.Append("BEGIN\n");
-            builder.Append($"\tDELETE\n");
-            builder.Append($"\tFROM {_schema}.{_info.SqlClassName}\n");
+            builder.Append($"\t@{idProperty.SqlName} {idProperty.SqlType}{_nl}");
+            builder.Append($"AS{_nl}");
+            builder.Append($"BEGIN{_nl}");
+            builder.Append($"\tDELETE{_nl}");
+            builder.Append($"\tFROM {_schema}.{_info.SqlClassName}{_nl}");
             builder.Append(
-                $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}\n"
+                $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}{_nl}"
             );
             builder.Append("END");
             var expected = builder.ToString();

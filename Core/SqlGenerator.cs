@@ -7,6 +7,7 @@ namespace Core
 {
     public class SqlGenerator
     {
+        private static readonly string _nl = Environment.NewLine;
         public static CrudStoredProcedures GetCrudStoredProcedures(
             ClassInfo info,
             string schemaName
@@ -27,15 +28,15 @@ namespace Core
                 "get_by_id",
                 new List<PropertyInfo> { idProperty }
             ));
-            getBuilder.Append("\tSELECT\n");
-            getBuilder.Append($"{FormatSelect(idProperty)},\n");
+            getBuilder.Append($"\tSELECT{_nl}");
+            getBuilder.Append($"{FormatSelect(idProperty)},{_nl}");
             getBuilder.AppendJoin(
-                ",\n",
+                $",{_nl}",
                 nonIdProperties.Select(x => FormatSelect(x))
             );
-            getBuilder.Append($"\n\tFROM {schemaName}.{info.SqlClassName}\n");
+            getBuilder.Append($"{_nl}\tFROM {schemaName}.{info.SqlClassName}{_nl}");
             getBuilder.Append(
-                $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}\n"
+                $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}{_nl}"
             );
             getBuilder.Append("END");
             retVal.GetById = getBuilder.ToString();
@@ -48,20 +49,20 @@ namespace Core
                 nonIdProperties
             ));
             createBuilder.Append(
-                $"\tINSERT {schemaName}.{info.SqlClassName} (\n"
+                $"\tINSERT {schemaName}.{info.SqlClassName} ({_nl}"
             );
             createBuilder.AppendJoin(
-                ",\n",
+                $",{_nl}",
                 nonIdProperties.Select(x => $"\t\t{x.SqlName}")
             );
-            createBuilder.Append("\n\t)\n");
-            createBuilder.Append("\tVALUES (\n");
+            createBuilder.Append($"{_nl}\t){_nl}");
+            createBuilder.Append($"\tVALUES ({_nl}");
             createBuilder.AppendJoin(
-                ",\n",
+                $",{_nl}",
                 nonIdProperties.Select(x => $"\t\t@{x.SqlName}")
             );
-            createBuilder.Append("\n\t);\n\n");
-            createBuilder.Append("\tSELECT SCOPE_IDENTITY()\n");
+            createBuilder.Append($"{_nl}\t);{_nl}{_nl}");
+            createBuilder.Append($"\tSELECT SCOPE_IDENTITY(){_nl}");
             createBuilder.Append("END");
             retVal.Create = createBuilder.ToString();
 
@@ -72,14 +73,14 @@ namespace Core
                 "update",
                 nonIdProperties.Prepend(idProperty)
             ));
-            updateBuilder.Append($"\tUPDATE {schemaName}.{info.SqlClassName}\n");
-            updateBuilder.Append("\tSET\n");
+            updateBuilder.Append($"\tUPDATE {schemaName}.{info.SqlClassName}{_nl}");
+            updateBuilder.Append($"\tSET{_nl}");
             updateBuilder.AppendJoin(
-                ",\n",
+                $",{_nl}",
                 nonIdProperties.Select(x => $"\t\t[{x.SqlName}] = @{x.SqlName}")
             );
             updateBuilder.Append(
-                $"\n\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}\n"
+                $"{_nl}\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}{_nl}"
             );
             updateBuilder.Append("END");
             retVal.Update = updateBuilder.ToString();
@@ -91,10 +92,10 @@ namespace Core
                 "delete",
                 new List<PropertyInfo> { idProperty }
             ));
-            deleteBuilder.Append("\tDELETE\n");
-            deleteBuilder.Append($"\tFROM {schemaName}.{info.SqlClassName}\n");
+            deleteBuilder.Append($"\tDELETE{_nl}");
+            deleteBuilder.Append($"\tFROM {schemaName}.{info.SqlClassName}{_nl}");
             deleteBuilder.Append(
-                $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}\n"
+                $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}{_nl}"
             );
             deleteBuilder.Append("END");
             retVal.Delete = deleteBuilder.ToString();
@@ -114,10 +115,10 @@ namespace Core
             var builder = new StringBuilder();
             builder.Append("CREATE OR ALTER PROCEDURE ");
             builder.Append(
-                $"{schemaName}.{tableName}_{procedureNameSuffix}\n"
+                $"{schemaName}.{tableName}_{procedureNameSuffix}{_nl}"
             );
-            builder.AppendJoin(",\n", parameterDeclarations);
-            builder.Append("\nAS\nBEGIN\n");
+            builder.AppendJoin($",{_nl}", parameterDeclarations);
+            builder.Append($"{_nl}AS{_nl}BEGIN{_nl}");
             return builder.ToString();
         }
 

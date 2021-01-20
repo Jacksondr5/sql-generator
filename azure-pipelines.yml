@@ -1,0 +1,48 @@
+name: "0.1$(Rev:.r)"
+
+pool:
+  vmImage: "ubuntu-latest"
+
+variables:
+  CI: "true"
+  isMaster: $[eq(variables['Build.SourceBranch'], 'refs/heads/master')]
+  solution: "sql-generator.sln"
+  buildPlatform: "Any CPU"
+  buildConfiguration: "Release"
+
+  steps:
+    - task: UseDotNet@2
+      inputs:
+        packageType: "sdk"
+        version: "5.0.x"
+    - task: SonarCloudPrepare@1
+      inputs:
+        SonarCloud: "SonarCloud"
+        organization: "jacksondr5"
+        scannerMode: "MSBuild"
+        projectKey: "01ffbbe9f7191614102d37f67c1148aedb773cb9"
+        projectName: "sql-generator"
+        projectVersion: $(Build.BuildNumber)
+    - task: DotNetCoreCLI@2
+      displayName: dotnet restore
+      inputs:
+        command: "restore"
+        projects: $(solution)
+        feedsToUse: "select"
+        verbosityRestore: "Normal"
+    - task: DotNetCoreCLI@2
+      displayName: Build Solution
+      inputs:
+        command: "build"
+        projects: $(solution)
+        arguments: "-c $(buildConfiguration) --no-restore --nologo"
+    - task: DotNetCoreCLI@2
+      displayName: Run Unit Tests
+      inputs:
+        command: "test"
+        projects: $(solution)
+        arguments: "--nologo --no-build -c $(buildConfiguration) -s ./UnitTest.runsettings"
+    - task: SonarCloudAnalyze@1
+    - task: SonarCloudPublish@1
+      inputs:
+        pollingTimeoutSec: "300"

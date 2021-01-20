@@ -1,5 +1,5 @@
-using System;
 using CaseExtensions;
+using System;
 
 namespace Core
 {

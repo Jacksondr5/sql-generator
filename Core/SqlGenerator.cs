@@ -8,12 +8,11 @@ namespace Core
     public class SqlGenerator
     {
         private static readonly string _nl = Environment.NewLine;
-        public static CrudStoredProcedures GetCrudStoredProcedures(
+        public static IEnumerable<SqlFile> GetCrudStoredProcedures(
             ClassInfo info,
             string schemaName
         )
         {
-            var retVal = new CrudStoredProcedures();
             var idProperty = info.Properties.Find(x => x.IsIdProperty);
             if (idProperty == null)
                 throw new InvalidOperationException("shouldn't happen");
@@ -22,10 +21,13 @@ namespace Core
                 .OrderBy(x => x.CSharpName);
 
             var getBuilder = new StringBuilder();
-            getBuilder.Append(GetProcedureStart(
+            var getProcName = GetProcedureName(
                 schemaName,
                 info.SqlClassName,
-                "get_by_id",
+                "get_by_id"
+            );
+            getBuilder.Append(GetProcedureStart(
+                getProcName,
                 new List<PropertyInfo> { idProperty }
             ));
             getBuilder.Append($"\tSELECT{_nl}");
@@ -39,15 +41,21 @@ namespace Core
                 $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}{_nl}"
             );
             getBuilder.Append("END");
-            retVal.GetById = getBuilder.ToString();
+            yield return new SqlFile
+            {
+                Name = $"{getProcName}.sql",
+                Content = getBuilder.ToString()
+            };
 
             var createBuilder = new StringBuilder();
-            createBuilder.Append(GetProcedureStart(
+            var createProcName = GetProcedureName(
                 schemaName,
                 info.SqlClassName,
-                "create",
-                nonIdProperties
-            ));
+                "create"
+            );
+            createBuilder.Append(
+                GetProcedureStart(createProcName, nonIdProperties)
+            );
             createBuilder.Append(
                 $"\tINSERT {schemaName}.{info.SqlClassName} ({_nl}"
             );
@@ -64,13 +72,20 @@ namespace Core
             createBuilder.Append($"{_nl}\t);{_nl}{_nl}");
             createBuilder.Append($"\tSELECT SCOPE_IDENTITY(){_nl}");
             createBuilder.Append("END");
-            retVal.Create = createBuilder.ToString();
+            yield return new SqlFile
+            {
+                Name = $"{createProcName}.sql",
+                Content = createBuilder.ToString()
+            };
 
             var updateBuilder = new StringBuilder();
-            updateBuilder.Append(GetProcedureStart(
+            var updateProcName = GetProcedureName(
                 schemaName,
                 info.SqlClassName,
-                "update",
+                "update"
+            );
+            updateBuilder.Append(GetProcedureStart(
+                updateProcName,
                 nonIdProperties.Prepend(idProperty)
             ));
             updateBuilder.Append($"\tUPDATE {schemaName}.{info.SqlClassName}{_nl}");
@@ -83,13 +98,20 @@ namespace Core
                 $"{_nl}\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}{_nl}"
             );
             updateBuilder.Append("END");
-            retVal.Update = updateBuilder.ToString();
+            yield return new SqlFile
+            {
+                Name = $"{updateProcName}.sql",
+                Content = updateBuilder.ToString()
+            };
 
             var deleteBuilder = new StringBuilder();
-            deleteBuilder.Append(GetProcedureStart(
+            var deleteProcName = GetProcedureName(
                 schemaName,
                 info.SqlClassName,
-                "delete",
+                "delete"
+            );
+            deleteBuilder.Append(GetProcedureStart(
+                deleteProcName,
                 new List<PropertyInfo> { idProperty }
             ));
             deleteBuilder.Append($"\tDELETE{_nl}");
@@ -98,14 +120,15 @@ namespace Core
                 $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}{_nl}"
             );
             deleteBuilder.Append("END");
-            retVal.Delete = deleteBuilder.ToString();
-            return retVal;
+            yield return new SqlFile
+            {
+                Name = $"{deleteProcName}.sql",
+                Content = deleteBuilder.ToString()
+            };
         }
 
         private static string GetProcedureStart(
-            string schemaName,
-            string tableName,
-            string procedureNameSuffix,
+            string procedureName,
             IEnumerable<PropertyInfo> inputProperties
         )
         {
@@ -114,13 +137,17 @@ namespace Core
             );
             var builder = new StringBuilder();
             builder.Append("CREATE OR ALTER PROCEDURE ");
-            builder.Append(
-                $"{schemaName}.{tableName}_{procedureNameSuffix}{_nl}"
-            );
+            builder.Append($"{procedureName}{_nl}");
             builder.AppendJoin($",{_nl}", parameterDeclarations);
             builder.Append($"{_nl}AS{_nl}BEGIN{_nl}");
             return builder.ToString();
         }
+
+        private static string GetProcedureName(
+            string schemaName,
+            string tableName,
+            string procedureNameSuffix
+        ) => $"{schemaName}.{tableName}_{procedureNameSuffix}";
 
         private static string FormatSelect(PropertyInfo info) =>
             $"\t\t[{info.CSharpName}] = [{info.SqlName}]";
@@ -128,11 +155,9 @@ namespace Core
         // private static string FormatInsert()
     }
 
-    public class CrudStoredProcedures
+    public class SqlFile
     {
-        public string Create { get; set; } = "";
-        public string Delete { get; set; } = "";
-        public string GetById { get; set; } = "";
-        public string Update { get; set; } = "";
+        public string Content { get; set; } = "";
+        public string Name { get; set; } = "";
     }
 }

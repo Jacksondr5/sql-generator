@@ -1,9 +1,9 @@
+using FluentAssertions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Core.Test
 {
@@ -29,7 +29,9 @@ namespace Core.Test
 
         [DataTestMethod]
         [ValidTypeDataSource]
-        public void GetFieldInfoFromType_ShouldPropertyMapCSharpType(ValidType expected)
+        public void GetFieldInfoFromType_ShouldPropertyMapCSharpType(
+            ValidType expected
+        )
         {
             //Act
             var actual = ClassInspector
@@ -159,6 +161,30 @@ namespace Core.Test
                     )
                 );
         }
+
+        [TestMethod]
+        public void GetFieldInfoFromType_ShouldNotIncludeClassProperties()
+        {
+            //Assemble
+            var notExpectedName = "SimpleTestClass";
+
+            //Act
+            var actual = ClassInspector.GetFieldInfoFromType(
+                typeof(TestClassWithComplexProperty)
+            );
+
+            //Assert
+            actual.Properties
+                .Select(x => x.CSharpName)
+                .Should()
+                .NotContain(notExpectedName);
+        }
+    }
+
+    internal class TestClassWithComplexProperty
+    {
+        public int Id { get; set; }
+        public SimpleTestClass SimpleTestClass { get; set; }
     }
 
     internal class SimpleTestClass
@@ -187,8 +213,10 @@ namespace Core.Test
 
     internal class ValidTypeDataSourceAttribute : Attribute, ITestDataSource
     {
-        public IEnumerable<object[]> GetData(MethodInfo methodInfo) =>
-            Enum.GetValues<ValidType>().Select(x => new object[] { x });
+        public IEnumerable<object[]> GetData(MethodInfo methodInfo) => Enum
+            .GetValues<ValidType>()
+            .Where(x => x != ValidType.InvalidType)
+            .Select(x => new object[] { x });
 
         public string GetDisplayName(MethodInfo methodInfo, object[] data) =>
             $"{Enum.GetName<ValidType>((ValidType)data[0])}";

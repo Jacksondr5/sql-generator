@@ -1,8 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace Core.Test
 {
@@ -47,9 +48,10 @@ namespace Core.Test
         {
             //Assemble
             var idProperty = _info.Properties[0];
+            var procName = $"{_schema}.{_info.SqlClassName}_get_by_id";
             var builder = new StringBuilder();
             builder.Append(
-                $"CREATE OR ALTER PROCEDURE {_schema}.{_info.SqlClassName}_get_by_id{_nl}"
+                $"CREATE OR ALTER PROCEDURE {procName}{_nl}"
             );
             builder.Append($"\t@{idProperty.SqlName} {idProperty.SqlType}{_nl}");
             builder.Append($"AS{_nl}");
@@ -69,22 +71,32 @@ namespace Core.Test
                 $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}{_nl}"
             );
             builder.Append("END");
-            var expected = builder.ToString();
+            var expected = new SqlFile
+            {
+                Content = builder.ToString(),
+                Name = $"{procName}.sql"
+            };
 
             //Act
             var actual = SqlGenerator.GetCrudStoredProcedures(_info, _schema);
 
             //Assert
-            actual.GetById.Should().Be(expected);
+            actual.Should().Contain(x => x.Name.Equals(expected.Name));
+            actual
+                .Where(x => x.Name.Equals(expected.Name))
+                .First().Content
+                .Should()
+                .Be(expected.Content);
         }
 
         [TestMethod]
         public void GetCrudStoredProcedures_ShouldGenerateCreateProc()
         {
             //Assemble
+            var procName = $"{_schema}.{_info.SqlClassName}_create";
             var builder = new StringBuilder();
             builder.Append(
-                $"CREATE OR ALTER PROCEDURE {_schema}.{_info.SqlClassName}_create{_nl}"
+                $"CREATE OR ALTER PROCEDURE {procName}{_nl}"
             );
             builder.Append(
                 $"\t@{_info.Properties[1].SqlName} {_info.Properties[1].SqlType},{_nl}"
@@ -105,13 +117,22 @@ namespace Core.Test
             builder.Append($"{_nl}");
             builder.Append($"\tSELECT SCOPE_IDENTITY(){_nl}");
             builder.Append("END");
-            var expected = builder.ToString();
+            var expected = new SqlFile
+            {
+                Content = builder.ToString(),
+                Name = $"{procName}.sql"
+            };
 
             //Act
             var actual = SqlGenerator.GetCrudStoredProcedures(_info, _schema);
 
             //Assert
-            actual.Create.Should().Be(expected);
+            actual.Should().Contain(x => x.Name.Equals(expected.Name));
+            actual
+                .Where(x => x.Name.Equals(expected.Name))
+                .First().Content
+                .Should()
+                .Be(expected.Content);
         }
 
         [TestMethod]
@@ -119,9 +140,10 @@ namespace Core.Test
         {
             //Assemble
             var idProperty = _info.Properties[0];
+            var procName = $"{_schema}.{_info.SqlClassName}_update";
             var builder = new StringBuilder();
             builder.Append(
-                $"CREATE OR ALTER PROCEDURE {_schema}.{_info.SqlClassName}_update{_nl}"
+                $"CREATE OR ALTER PROCEDURE {procName}{_nl}"
             );
             builder.Append($"\t@{idProperty.SqlName} {idProperty.SqlType},{_nl}");
             builder.Append(
@@ -144,13 +166,22 @@ namespace Core.Test
                 $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}{_nl}"
             );
             builder.Append("END");
-            var expected = builder.ToString();
+            var expected = new SqlFile
+            {
+                Content = builder.ToString(),
+                Name = $"{procName}.sql"
+            };
 
             //Act
             var actual = SqlGenerator.GetCrudStoredProcedures(_info, _schema);
 
             //Assert
-            actual.Update.Should().Be(expected);
+            actual.Should().Contain(x => x.Name.Equals(expected.Name));
+            actual
+                .Where(x => x.Name.Equals(expected.Name))
+                .First().Content
+                .Should()
+                .Be(expected.Content);
         }
 
         [TestMethod]
@@ -158,9 +189,10 @@ namespace Core.Test
         {
             //Assemble
             var idProperty = _info.Properties[0];
+            var procName = $"{_schema}.{_info.SqlClassName}_delete";
             var builder = new StringBuilder();
             builder.Append(
-                $"CREATE OR ALTER PROCEDURE {_schema}.{_info.SqlClassName}_delete{_nl}"
+                $"CREATE OR ALTER PROCEDURE {procName}{_nl}"
             );
             builder.Append($"\t@{idProperty.SqlName} {idProperty.SqlType}{_nl}");
             builder.Append($"AS{_nl}");
@@ -171,13 +203,22 @@ namespace Core.Test
                 $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}{_nl}"
             );
             builder.Append("END");
-            var expected = builder.ToString();
+            var expected = new SqlFile
+            {
+                Content = builder.ToString(),
+                Name = $"{procName}.sql"
+            };
 
             //Act
             var actual = SqlGenerator.GetCrudStoredProcedures(_info, _schema);
 
             //Assert
-            actual.Delete.Should().Be(expected);
+            actual.Should().Contain(x => x.Name.Equals(expected.Name));
+            actual
+                .Where(x => x.Name.Equals(expected.Name))
+                .First().Content
+                .Should()
+                .Be(expected.Content);
         }
     }
 }

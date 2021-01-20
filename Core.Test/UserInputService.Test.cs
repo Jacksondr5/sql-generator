@@ -1,8 +1,8 @@
-using System;
-using System.Collections.Generic;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System;
+using System.Collections.Generic;
 
 namespace Core.Test
 {
@@ -10,7 +10,6 @@ namespace Core.Test
     public class UserInputServiceTest
     {
         private Mock<IUserInputRepository> _mockRepo;
-        private UserInputService _service;
         private const string _mockRepoReturnValue = "5";
         private ClassInfo _classInfo;
 
@@ -33,7 +32,6 @@ namespace Core.Test
             _mockRepo
                 .Setup(x => x.GetUserInput(It.IsAny<string>()))
                 .Returns(_mockRepoReturnValue);
-            _service = new UserInputService(_mockRepo.Object);
         }
 
 
@@ -41,10 +39,10 @@ namespace Core.Test
         public void GetUserInfo_ClassContainsString_ShouldAskUserForLength()
         {
             //Assemble
-            _classInfo.Properties[0].CSharpType  = ValidType.String;
+            _classInfo.Properties[0].CSharpType = ValidType.String;
 
             //Act
-            _service.GetUserInfo(_classInfo);
+            UserInputService.GetUserInfo(_classInfo, _mockRepo.Object);
 
             //Assert
             _mockRepo.Verify(
@@ -59,10 +57,10 @@ namespace Core.Test
         public void GetUserInfo_ClassContainsDecimal_ShouldAskUserForPrecisionAndScale()
         {
             //Assemble
-            _classInfo.Properties[0].CSharpType  = ValidType.Decimal;
+            _classInfo.Properties[0].CSharpType = ValidType.Decimal;
 
             //Act
-            _service.GetUserInfo(_classInfo);
+            UserInputService.GetUserInfo(_classInfo, _mockRepo.Object);
 
             //Assert
             _mockRepo.Verify(
@@ -83,10 +81,10 @@ namespace Core.Test
         public void GetUserInfo_ClassContainsDouble_ShouldAskUserForPrecisionAndScale()
         {
             //Assemble
-            _classInfo.Properties[0].CSharpType  = ValidType.Double;
+            _classInfo.Properties[0].CSharpType = ValidType.Double;
 
             //Act
-            _service.GetUserInfo(_classInfo);
+            UserInputService.GetUserInfo(_classInfo, _mockRepo.Object);
 
             //Assert
             _mockRepo.Verify(
@@ -107,10 +105,10 @@ namespace Core.Test
         public void GetUserInfo_ClassDoesntNeedExtraInfo_ShouldNotAskUserForAnything()
         {
             //Assemble
-            _classInfo.Properties[0].CSharpType  = ValidType.Bool;
+            _classInfo.Properties[0].CSharpType = ValidType.Bool;
 
             //Act
-            _service.GetUserInfo(_classInfo);
+            UserInputService.GetUserInfo(_classInfo, _mockRepo.Object);
 
             //Assert
             _mockRepo.Verify(
@@ -128,9 +126,9 @@ namespace Core.Test
             _mockRepo
                 .Setup(x => x.GetUserInput(It.IsAny<string>()))
                 .Returns(invalidInput);
-            
+
             //Act
-            Action act = () => _service.GetUserInfo(_classInfo);
+            Action act = () => UserInputService.GetUserInfo(_classInfo, _mockRepo.Object);
 
             //Assert
             act

@@ -1,30 +1,27 @@
-using System;
-
 namespace Core
 {
-    public class UserInputService
+    public static class UserInputService
     {
-        private readonly IUserInputRepository _repo;
-        public UserInputService(IUserInputRepository repo) =>
-            (_repo) = (repo);
-
-        public ClassInfo GetUserInfo(ClassInfo info)
+        public static ClassInfo GetUserInfo(
+            ClassInfo info,
+            IUserInputRepository repo
+        )
         {
             foreach (var property in info.Properties)
             {
                 var type = property.CSharpType;
                 if (type == ValidType.String)
                 {
-                    property.Length = ParseUserInput(_repo.GetUserInput(
+                    property.Length = ParseUserInput(repo.GetUserInput(
                         GetLengthMessage(property.CSharpName)
                     ));
                 }
                 else if (type == ValidType.Decimal || type == ValidType.Double)
                 {
-                    property.Precision = ParseUserInput(_repo.GetUserInput(
+                    property.Precision = ParseUserInput(repo.GetUserInput(
                         GetPrecisionMessage(property.CSharpName)
                     ));
-                    property.Scale = ParseUserInput(_repo.GetUserInput(
+                    property.Scale = ParseUserInput(repo.GetUserInput(
                         GetScaleMessage(property.CSharpName)
                     ));
                 }

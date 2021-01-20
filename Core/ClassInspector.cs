@@ -1,9 +1,9 @@
-﻿using System;
+﻿using CaseExtensions;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
-using CaseExtensions;
 
 namespace Core
 {
@@ -38,13 +38,12 @@ namespace Core
                             "Decimal" => ValidType.Decimal,
                             "Double" => ValidType.Double,
                             "String" => ValidType.String,
-                            _ => throw new InvalidOperationException(
-                                "unknown C# type"
-                            )
+                            _ => ValidType.InvalidType
                         },
                         IsIdProperty =
                             x.Name.Equals(_idPropertyName)
                     })
+                    .Where(x => x.CSharpType != ValidType.InvalidType)
                     .ToList(),
                 SqlClassName = type.Name.ToSnakeCase()
             };

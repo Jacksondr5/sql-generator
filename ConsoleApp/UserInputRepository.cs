@@ -1,5 +1,5 @@
-using System;
 using Core;
+using System;
 
 namespace ConsoleApp
 {

@@ -15,6 +15,11 @@ steps:
     inputs:
       packageType: "sdk"
       version: "5.0.x"
+  # Needed for SonarQube
+  - task: UseDotNet@2
+    inputs:
+      packageType: "sdk"
+      version: "3.1.x"
   - task: SonarCloudPrepare@1
     inputs:
       SonarCloud: "SonarCloud"

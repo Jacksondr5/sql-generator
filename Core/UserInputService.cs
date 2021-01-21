@@ -12,9 +12,9 @@ namespace Core
                 var type = property.CSharpType;
                 if (type == ValidType.String)
                 {
-                    property.Length = ParseUserInput(repo.GetUserInput(
+                    property.Length = repo.GetUserInput(
                         GetLengthMessage(property.CSharpName)
-                    ));
+                    );
                 }
                 else if (type == ValidType.Decimal || type == ValidType.Double)
                 {

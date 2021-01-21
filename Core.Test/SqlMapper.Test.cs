@@ -52,7 +52,7 @@ namespace Core.Test
         [TypeWithLengthDataSource]
         public void MapPropertyToSql_TypeHasLength_ShouldAddLengthToType(
             ValidType type,
-            int length,
+            string length,
             string expected
         )
         {
@@ -138,10 +138,10 @@ namespace Core.Test
 
     internal class TypeWithLengthDataSourceAttribute : BaseTypeDataSourceAttribute
     {
-        private const int _length = 5;
         private List<object[]> _sqlTypes = new List<object[]>()
         {
-            new object[] { ValidType.String, _length, $"VARCHAR({_length})", },
+            new object[] { ValidType.String, "5", $"VARCHAR(5)" },
+            new object[] { ValidType.String, "MAX", $"VARCHAR(MAX)" }
         };
         public override List<object[]> SqlTypes { get { return _sqlTypes; } }
     }
@@ -157,14 +157,14 @@ namespace Core.Test
                 ValidType.Decimal,
                 _precision,
                 _scale,
-                $"DECIMAL({_precision}, {_scale})",
+                $"DECIMAL({_precision}, {_scale})"
             },
             new object[]
             {
                 ValidType.Double,
                 _precision,
                 _scale,
-                $"DECIMAL({_precision}, {_scale})",
+                $"DECIMAL({_precision}, {_scale})"
             },
         };
         public override List<object[]> SqlTypes { get { return _sqlTypes; } }

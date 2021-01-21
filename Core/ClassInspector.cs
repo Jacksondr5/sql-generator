@@ -93,7 +93,7 @@ namespace Core
         public string CSharpName { get; set; } = "";
         public ValidType CSharpType { get; set; }
         public bool IsIdProperty { get; set; }
-        public int Length { get; set; }
+        public string Length { get; set; } = "";
         public int Precision { get; set; }
         public int Scale { get; set; }
         public string SqlName { get; set; } = "";

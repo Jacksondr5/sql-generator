@@ -122,7 +122,7 @@ namespace Core.Test
         {
             //Assemble
             var invalidInput = "invalid input";
-            _classInfo.Properties[0].CSharpType = ValidType.String;
+            _classInfo.Properties[0].CSharpType = ValidType.Decimal;
             _mockRepo
                 .Setup(x => x.GetUserInput(It.IsAny<string>()))
                 .Returns(invalidInput);

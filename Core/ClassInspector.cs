@@ -35,6 +35,7 @@ namespace Core
                         {
                             "Int32" => ValidType.Int,
                             "Boolean" => ValidType.Bool,
+                            "DateTime" => ValidType.DateTime,
                             "Decimal" => ValidType.Decimal,
                             "Double" => ValidType.Double,
                             "String" => ValidType.String,

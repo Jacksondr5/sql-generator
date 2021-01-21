@@ -12,6 +12,7 @@ namespace Core
             {
                 ValidType.Int => "INT",
                 ValidType.Bool => "BIT",
+                ValidType.DateTime => "DATETIME",
                 ValidType.Decimal => $"DECIMAL({info.Precision}, {info.Scale})",
                 ValidType.Double => $"DECIMAL({info.Precision}, {info.Scale})",
                 ValidType.String => $"VARCHAR({info.Length})",

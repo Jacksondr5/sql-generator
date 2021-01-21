@@ -2,6 +2,7 @@ using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Core.Test
@@ -106,15 +107,33 @@ namespace Core.Test
 
     internal class BuiltInTypeDataSourceAttribute : BaseTypeDataSourceAttribute
     {
-        private List<object[]> _sqlTypes = new List<object[]>()
+        private Dictionary<ValidType, string> _sqlTypes = new Dictionary<ValidType, string>
         {
-            new object[] { ValidType.Bool, "BIT", } ,
-            new object[] { ValidType.Decimal, "DECIMAL", },
-            new object[] { ValidType.Double, "DECIMAL", },
-            new object[] { ValidType.Int, "INT", },
-            new object[] { ValidType.String, "VARCHAR", },
+            { ValidType.Bool, "BIT" } ,
+            { ValidType.DateTime, "DATETIME" },
+            { ValidType.Decimal, "DECIMAL" },
+            { ValidType.Double, "DECIMAL" },
+            { ValidType.Int, "INT" },
+            { ValidType.String, "VARCHAR" },
         };
-        public override List<object[]> SqlTypes { get { return _sqlTypes; } }
+        public override List<object[]> SqlTypes
+        {
+            get
+            {
+                return Enum
+                    .GetValues<ValidType>()
+                    .Where(x => x != ValidType.InvalidType)
+                    .Select(x => new object[]
+                    {
+                        x,
+                        _sqlTypes.GetValueOrDefault(x) ??
+                            throw new InvalidOperationException(
+                                $"The type {x} is missing from the test dictionary"
+                            )
+                    })
+                    .ToList();
+            }
+        }
     }
 
     internal class TypeWithLengthDataSourceAttribute : BaseTypeDataSourceAttribute

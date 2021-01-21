@@ -51,7 +51,7 @@ namespace Core
             var createProcName = GetProcedureName(
                 schemaName,
                 info.SqlClassName,
-                "create"
+                "insert"
             );
             createBuilder.Append(
                 GetProcedureStart(createProcName, nonIdProperties)

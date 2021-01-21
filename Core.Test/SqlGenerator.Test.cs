@@ -93,7 +93,7 @@ namespace Core.Test
         public void GetCrudStoredProcedures_ShouldGenerateCreateProc()
         {
             //Assemble
-            var procName = $"{_schema}.{_info.SqlClassName}_create";
+            var procName = $"{_schema}.{_info.SqlClassName}_insert";
             var builder = new StringBuilder();
             builder.Append(
                 $"CREATE OR ALTER PROCEDURE {procName}{_nl}"

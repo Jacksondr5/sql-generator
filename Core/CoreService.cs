@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,6 +28,8 @@ namespace Core
                 assemblyPath,
                 typeName
             );
+            if (type == null)
+                throw new ArgumentException(ArgumentExceptionTypeNotFound);
             var typeInfo = ClassInspector.GetFieldInfoFromType(
                 type,
                 includePrivateProperties
@@ -45,6 +48,8 @@ namespace Core
                 );
         }
 
+        public const string ArgumentExceptionTypeNotFound =
+            "The given type was not found in the given assembly";
         public const string GetSchemaMessage = "What is the schema name?";
     }
 }

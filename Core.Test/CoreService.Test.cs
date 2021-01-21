@@ -1,7 +1,8 @@
+using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System;
 using System.Threading.Tasks;
-
 namespace Core.Test
 {
     [TestClass]
@@ -84,5 +85,29 @@ namespace Core.Test
                 Times.Exactly(4)
             );
         }
+
+#nullable enable
+        [TestMethod]
+        public void GenerateSqlForType_TypeIsNull_ShouldThrowException()
+        {
+            //Assemble
+            _classObtainerMock
+                .Setup(x => x.GetTypeFromAssembly(
+                    It.IsAny<string>(),
+                    It.IsAny<string>())
+                )
+                .Returns((Type?)null);
+
+            //Act
+            Func<Task> act = async () =>
+                await _service.GenerateSqlForType("", "", "", false);
+
+            //Assert
+            act
+                .Should()
+                .ThrowExactly<ArgumentException>()
+                .WithMessage(CoreService.ArgumentExceptionTypeNotFound);
+        }
+#nullable disable
     }
 }

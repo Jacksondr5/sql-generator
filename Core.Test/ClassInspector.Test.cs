@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,20 @@ namespace Core.Test
     [TestClass]
     public class ClassInspectorTest
     {
+        private Mock<IUserInputRepository> _userInputRepoMock;
+        private ClassInspector _inspector;
+
+        [TestInitialize()]
+        public void InitializeTests()
+        {
+            _userInputRepoMock = new Mock<IUserInputRepository>();
+            _userInputRepoMock
+                .Setup(x => x.GetUserInput(It.IsAny<string>()))
+                .Returns("");
+            _inspector = new ClassInspector(_userInputRepoMock.Object);
+        }
+
+
         [TestMethod]
         public void GetFieldInfoFromType_ShouldPropertyMapCSharpName()
         {
@@ -17,8 +32,8 @@ namespace Core.Test
             var expected = "PublicTestString";
 
             //Act
-            var actual = ClassInspector
-                .GetFieldInfoFromType(typeof(SimpleTestClass));
+            var actual =
+                _inspector.GetFieldInfoFromType(typeof(SimpleTestClass));
 
             //Assert
             actual.Properties
@@ -34,8 +49,9 @@ namespace Core.Test
         )
         {
             //Act
-            var actual = ClassInspector
-                .GetFieldInfoFromType(typeof(AllValidValuesTestClass));
+            var actual = _inspector.GetFieldInfoFromType(
+                typeof(AllValidValuesTestClass)
+            );
 
             //Assert
             actual.Properties
@@ -56,7 +72,7 @@ namespace Core.Test
 
             //Act
             var actual =
-                ClassInspector.GetFieldInfoFromType(typeof(SimpleTestClass));
+                _inspector.GetFieldInfoFromType(typeof(SimpleTestClass));
 
             //Assert
             actual.Properties.Should().NotContain(privateProperty);
@@ -69,7 +85,7 @@ namespace Core.Test
             var expected = "PrivateTestString";
 
             //Act
-            var actual = ClassInspector.GetFieldInfoFromType(
+            var actual = _inspector.GetFieldInfoFromType(
                 typeof(SimpleTestClass),
                 includePrivateProperties: true
             );
@@ -89,9 +105,8 @@ namespace Core.Test
             var expected = "simple_test_class";
 
             //Act
-            var actual = ClassInspector.GetFieldInfoFromType(
-                typeof(SimpleTestClass)
-            );
+            var actual =
+                _inspector.GetFieldInfoFromType(typeof(SimpleTestClass));
 
             //Assert
             actual.SqlClassName.Should().Be(expected);
@@ -104,9 +119,8 @@ namespace Core.Test
             var expected = "SimpleTestClass";
 
             //Act
-            var actual = ClassInspector.GetFieldInfoFromType(
-                typeof(SimpleTestClass)
-            );
+            var actual =
+                _inspector.GetFieldInfoFromType(typeof(SimpleTestClass));
 
             //Assert
             actual.CSharpClassName.Should().Be(expected);
@@ -116,9 +130,8 @@ namespace Core.Test
         public void GetFieldInfoFromType_ShouldSetFlagOnIdProperty()
         {
             //Act
-            var actual = ClassInspector.GetFieldInfoFromType(
-                typeof(SimpleTestClass)
-            );
+            var actual =
+                _inspector.GetFieldInfoFromType(typeof(SimpleTestClass));
 
             //Assert
             actual.Properties
@@ -127,39 +140,78 @@ namespace Core.Test
         }
 
         [TestMethod]
-        public void GetFieldInfoFromType_NoIdPropertyPresent_ShouldThrowException()
+        public void GetFieldInfoFromType_NoIdPropertyPresent_ShouldAskForIdProperty()
         {
+            //Assemble
+            _userInputRepoMock
+                .Setup(x => x.GetUserInput(ClassInspector.NoIdPropertyMessage))
+                .Returns("StringProperty");
+
             //Act
-            Action act = () => ClassInspector.GetFieldInfoFromType(
-                typeof(MissingIdTestClass)
-            );
+            var info =
+                _inspector.GetFieldInfoFromType(typeof(MissingIdTestClass));
 
             //Assert
-            act
+            _userInputRepoMock.Verify(
+                x => x.GetUserInput(ClassInspector.NoIdPropertyMessage),
+                Times.Once
+            );
+            info.Properties
+                .First(x => x.CSharpName.Equals("StringProperty"))
+                .IsIdProperty
                 .Should()
+                .BeTrue();
+        }
+
+        [TestMethod]
+        public void GetFieldInfoFromType_UserProvidesInvalidIdPropertyName_ShouldThrowException()
+        {
+            //Assemble
+            var invalidProperty = "not a real property";
+            _userInputRepoMock
+                .Setup(x => x.GetUserInput(ClassInspector.NoIdPropertyMessage))
+                .Returns(invalidProperty);
+
+            //Act
+            Action act = () =>
+                _inspector.GetFieldInfoFromType(typeof(MissingIdTestClass));
+
+            //Assert
+            act.
+                Should()
                 .ThrowExactly<InvalidInputException>()
-                .WithMessage(ClassInspector.InvalidInputExceptionNoIdProperty(
-                    "MissingIdTestClass"
+                .WithMessage(ClassInspector.InvalidInputExceptionIdProperty(
+                    invalidProperty
                 ));
         }
 
         [TestMethod]
-        public void GetFieldInfoFromType_IdPropertyIsNotInt_ShouldThrowException()
+        public void GetFieldInfoFromType_NoIdPropertyPresent_ShouldAllowCompoundKey()
         {
+            //Assemble
+            _userInputRepoMock
+                .Setup(x => x.GetUserInput(ClassInspector.NoIdPropertyMessage))
+                .Returns("StringProperty,IntProperty");
+
             //Act
-            Action act = () => ClassInspector.GetFieldInfoFromType(
-                typeof(InvalidIdTestClass)
-            );
+            var info =
+                _inspector.GetFieldInfoFromType(typeof(MissingIdTestClass));
 
             //Assert
-            act
+            _userInputRepoMock.Verify(
+                x => x.GetUserInput(ClassInspector.NoIdPropertyMessage),
+                Times.Once
+            );
+            info.Properties
+                .First(x => x.CSharpName.Equals("StringProperty"))
+                .IsIdProperty
                 .Should()
-                .ThrowExactly<InvalidInputException>()
-                .WithMessage(
-                    ClassInspector.InvalidInputExceptionIdPropertyNotInt(
-                        "InvalidIdTestClass"
-                    )
-                );
+                .BeTrue();
+            info.Properties
+                .First(x => x.CSharpName.Equals("IntProperty"))
+                .IsIdProperty
+                .Should()
+                .BeTrue();
         }
 
         [TestMethod]
@@ -169,7 +221,7 @@ namespace Core.Test
             var notExpectedName = "SimpleTestClass";
 
             //Act
-            var actual = ClassInspector.GetFieldInfoFromType(
+            var actual = _inspector.GetFieldInfoFromType(
                 typeof(TestClassWithComplexProperty)
             );
 
@@ -199,7 +251,11 @@ namespace Core.Test
         public string Id { get; set; }
     }
 
-    internal class MissingIdTestClass { }
+    internal class MissingIdTestClass
+    {
+        public string StringProperty { get; set; }
+        public int IntProperty { get; set; }
+    }
 
     internal class AllValidValuesTestClass
     {

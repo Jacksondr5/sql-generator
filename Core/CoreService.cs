@@ -30,7 +30,8 @@ namespace Core
             );
             if (type == null)
                 throw new ArgumentException(ArgumentExceptionTypeNotFound);
-            var typeInfo = ClassInspector.GetFieldInfoFromType(
+            var inspector = new ClassInspector(_userInputRepo);
+            var typeInfo = inspector.GetFieldInfoFromType(
                 type,
                 includePrivateProperties
             );

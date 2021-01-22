@@ -9,8 +9,11 @@ namespace Core
 {
     public class ClassInspector
     {
+        private readonly IUserInputRepository _userInputRepo;
+        public ClassInspector(IUserInputRepository userInputRepo) =>
+            (_userInputRepo) = (userInputRepo);
         private const string _idPropertyName = "Id";
-        public static ClassInfo GetFieldInfoFromType(
+        public ClassInfo GetFieldInfoFromType(
             Type type,
             bool includePrivateProperties = false
         )
@@ -49,14 +52,23 @@ namespace Core
                 SqlClassName = type.Name.ToSnakeCase()
             };
             if (!info.Properties.Any(x => x.IsIdProperty))
-                throw new InvalidInputException(
-                    InvalidInputExceptionNoIdProperty(info.CSharpClassName)
-                );
-            //Result of Find is not null due to the Any check above
-            if (info.Properties.Find(x => x.IsIdProperty)!.CSharpType != ValidType.Int)
-                throw new InvalidInputException(
-                    InvalidInputExceptionIdPropertyNotInt(info.CSharpClassName)
-                );
+            {
+                var idPropertyNames = _userInputRepo
+                    .GetUserInput(NoIdPropertyMessage)
+                    .Split(',');
+                foreach (var idPropertyName in idPropertyNames)
+                {
+                    if (!info.Properties.Any(x =>
+                        x.CSharpName.Equals(idPropertyName)
+                    ))
+                        throw new InvalidInputException(
+                            InvalidInputExceptionIdProperty(idPropertyName)
+                        );
+                    info.Properties
+                        .First(x => x.CSharpName.Equals(idPropertyName))
+                        .IsIdProperty = true;
+                }
+            }
             return info;
         }
 
@@ -72,12 +84,10 @@ namespace Core
                 (includePrivateProperties && getMethod.IsPrivate);
         }
 
-        public static string InvalidInputExceptionIdPropertyNotInt(
-            string className
-        ) => $"The class {className} has an ID property that is not an int";
-        public static string InvalidInputExceptionNoIdProperty(
-            string className
-        ) => $"The class {className} has no Id property";
+        public static string InvalidInputExceptionIdProperty(string property) =>
+            $"The given ID property {property} does not exist";
+        public const string NoIdPropertyMessage =
+            "What property/properties should be considered the ID property/properties?  Enter a comma deliniated list of ID properties";
     }
 
     public class ClassInfo

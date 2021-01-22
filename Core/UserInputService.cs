@@ -9,7 +9,7 @@ namespace Core
         {
             foreach (var property in info.Properties)
             {
-                var type = property.CSharpType;
+                var type = property.ValidType;
                 if (type == ValidType.String)
                 {
                     property.Length = repo.GetUserInput(

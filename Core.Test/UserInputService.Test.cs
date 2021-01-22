@@ -24,7 +24,7 @@ namespace Core.Test
                     new PropertyInfo
                     {
                         CSharpName = "Test Name",
-                        CSharpType = ValidType.Bool
+                        ValidType = ValidType.Bool
                     }
                 }
             };
@@ -39,7 +39,7 @@ namespace Core.Test
         public void GetUserInfo_ClassContainsString_ShouldAskUserForLength()
         {
             //Assemble
-            _classInfo.Properties[0].CSharpType = ValidType.String;
+            _classInfo.Properties[0].ValidType = ValidType.String;
 
             //Act
             UserInputService.GetUserInfo(_classInfo, _mockRepo.Object);
@@ -57,7 +57,7 @@ namespace Core.Test
         public void GetUserInfo_ClassContainsDecimal_ShouldAskUserForPrecisionAndScale()
         {
             //Assemble
-            _classInfo.Properties[0].CSharpType = ValidType.Decimal;
+            _classInfo.Properties[0].ValidType = ValidType.Decimal;
 
             //Act
             UserInputService.GetUserInfo(_classInfo, _mockRepo.Object);
@@ -81,7 +81,7 @@ namespace Core.Test
         public void GetUserInfo_ClassContainsDouble_ShouldAskUserForPrecisionAndScale()
         {
             //Assemble
-            _classInfo.Properties[0].CSharpType = ValidType.Double;
+            _classInfo.Properties[0].ValidType = ValidType.Double;
 
             //Act
             UserInputService.GetUserInfo(_classInfo, _mockRepo.Object);
@@ -105,7 +105,7 @@ namespace Core.Test
         public void GetUserInfo_ClassDoesntNeedExtraInfo_ShouldNotAskUserForAnything()
         {
             //Assemble
-            _classInfo.Properties[0].CSharpType = ValidType.Bool;
+            _classInfo.Properties[0].ValidType = ValidType.Bool;
 
             //Act
             UserInputService.GetUserInfo(_classInfo, _mockRepo.Object);
@@ -122,7 +122,7 @@ namespace Core.Test
         {
             //Assemble
             var invalidInput = "invalid input";
-            _classInfo.Properties[0].CSharpType = ValidType.Decimal;
+            _classInfo.Properties[0].ValidType = ValidType.Decimal;
             _mockRepo
                 .Setup(x => x.GetUserInput(It.IsAny<string>()))
                 .Returns(invalidInput);

@@ -19,7 +19,7 @@ namespace Core.Test
                 new PropertyInfo
                 {
                     CSharpName = "Id",
-                    CSharpType = ValidType.Int,
+                    ValidType = ValidType.Int,
                     IsIdProperty = true,
                     SqlName = "test_class_id",
                     SqlType = "INT"
@@ -27,14 +27,14 @@ namespace Core.Test
                 new PropertyInfo
                 {
                     CSharpName = "AnotherTestProperty",
-                    CSharpType = ValidType.Int,
+                    ValidType = ValidType.Int,
                     SqlName = "another_test_property",
                     SqlType = "INT"
                 },
                 new PropertyInfo
                 {
                     CSharpName = "TestProperty",
-                    CSharpType = ValidType.String,
+                    ValidType = ValidType.String,
                     SqlName = "test_property",
                     SqlType = "VARCHAR(128)"
                 },

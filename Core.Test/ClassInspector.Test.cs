@@ -37,7 +37,7 @@ namespace Core.Test
 
             //Assert
             actual.Properties
-                .First(x => x.CSharpType == ValidType.String).CSharpName
+                .First(x => x.ValidType == ValidType.String).CSharpName
                 .Should()
                 .Be(expected);
         }
@@ -55,7 +55,7 @@ namespace Core.Test
 
             //Assert
             actual.Properties
-                .Select(x => x.CSharpType)
+                .Select(x => x.ValidType)
                 .Should()
                 .Contain(expected);
         }
@@ -67,7 +67,7 @@ namespace Core.Test
             var privateProperty = new PropertyInfo
             {
                 CSharpName = "PrivateTestString",
-                CSharpType = ValidType.String
+                ValidType = ValidType.String
             };
 
             //Act
@@ -264,6 +264,7 @@ namespace Core.Test
         public bool Bool { get; set; }
         public DateTime DateTime { get; set; }
         public decimal Decimal { get; set; }
+        public ValidType Enum { get; set; }
         public double Double { get; set; }
         public string String { get; set; }
     }

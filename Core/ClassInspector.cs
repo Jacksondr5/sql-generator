@@ -34,20 +34,11 @@ namespace Core
                     .Select(x => new PropertyInfo
                     {
                         CSharpName = x.Name,
-                        CSharpType = x.PropertyType.Name switch
-                        {
-                            "Int32" => ValidType.Int,
-                            "Boolean" => ValidType.Bool,
-                            "DateTime" => ValidType.DateTime,
-                            "Decimal" => ValidType.Decimal,
-                            "Double" => ValidType.Double,
-                            "String" => ValidType.String,
-                            _ => ValidType.InvalidType
-                        },
-                        IsIdProperty =
-                            x.Name.Equals(_idPropertyName)
+                        CSharpType = x.PropertyType,
+                        ValidType = GetValidType(x.PropertyType),
+                        IsIdProperty = x.Name.Equals(_idPropertyName)
                     })
-                    .Where(x => x.CSharpType != ValidType.InvalidType)
+                    .Where(x => x.ValidType != ValidType.InvalidType)
                     .ToList(),
                 SqlClassName = type.Name.ToSnakeCase()
             };
@@ -84,6 +75,22 @@ namespace Core
                 (includePrivateProperties && getMethod.IsPrivate);
         }
 
+        private static ValidType GetValidType(Type type)
+        {
+            if (type.IsEnum)
+                return ValidType.Enum;
+            return type.Name switch
+            {
+                "Int32" => ValidType.Int,
+                "Boolean" => ValidType.Bool,
+                "DateTime" => ValidType.DateTime,
+                "Decimal" => ValidType.Decimal,
+                "Double" => ValidType.Double,
+                "String" => ValidType.String,
+                _ => ValidType.InvalidType
+            };
+        }
+
         public static string InvalidInputExceptionIdProperty(string property) =>
             $"The given ID property {property} does not exist";
         public const string NoIdPropertyMessage =
@@ -101,13 +108,14 @@ namespace Core
     public class PropertyInfo
     {
         public string CSharpName { get; set; } = "";
-        public ValidType CSharpType { get; set; }
+        public Type CSharpType { get; set; } = typeof(BadType);
         public bool IsIdProperty { get; set; }
         public string Length { get; set; } = "";
         public int Precision { get; set; }
         public int Scale { get; set; }
         public string SqlName { get; set; } = "";
         public string SqlType { get; set; } = "";
+        public ValidType ValidType { get; set; }
     }
 
     internal class BadType { }

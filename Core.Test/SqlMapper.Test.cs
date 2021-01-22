@@ -17,7 +17,7 @@ namespace Core.Test
             var property = new PropertyInfo
             {
                 CSharpName = "PublicTestString",
-                CSharpType = ValidType.Int
+                ValidType = ValidType.Int
             };
             var expected = "public_test_string";
 
@@ -38,7 +38,7 @@ namespace Core.Test
             //Assemble
             var property = new PropertyInfo
             {
-                CSharpType = type
+                ValidType = type
             };
 
             //Act
@@ -59,7 +59,7 @@ namespace Core.Test
             //Assemble
             var property = new PropertyInfo
             {
-                CSharpType = type,
+                ValidType = type,
                 Length = length
             };
 
@@ -82,7 +82,7 @@ namespace Core.Test
             //Assemble
             var property = new PropertyInfo
             {
-                CSharpType = type,
+                ValidType = type,
                 Scale = scale,
                 Precision = precision
             };
@@ -113,6 +113,7 @@ namespace Core.Test
             { ValidType.DateTime, "DATETIME" },
             { ValidType.Decimal, "DECIMAL" },
             { ValidType.Double, "DECIMAL" },
+            { ValidType.Enum, "INT" },
             { ValidType.Int, "INT" },
             { ValidType.String, "VARCHAR" },
         };

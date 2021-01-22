@@ -6,6 +6,7 @@ namespace Core
         DateTime = 6,
         Decimal = 3,
         Double = 4,
+        Enum = 7,
         Int = 1,
         InvalidType = -1,
         String = 5

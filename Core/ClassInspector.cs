@@ -79,6 +79,11 @@ namespace Core
         {
             if (type.IsEnum)
                 return ValidType.Enum;
+            else if (
+                type.IsGenericType &&
+                type.GetGenericTypeDefinition() == typeof(List<>)
+            )
+                return ValidType.List;
             return type.Name switch
             {
                 "Int32" => ValidType.Int,

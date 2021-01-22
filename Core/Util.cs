@@ -9,6 +9,7 @@ namespace Core
         Enum = 7,
         Int = 1,
         InvalidType = -1,
+        List = 8,
         String = 5
     }
 }

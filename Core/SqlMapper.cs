@@ -16,6 +16,7 @@ namespace Core
                 ValidType.Decimal => $"DECIMAL({info.Precision}, {info.Scale})",
                 ValidType.Double => $"DECIMAL({info.Precision}, {info.Scale})",
                 ValidType.Enum => "INT",
+                ValidType.List => $"VARCHAR({info.Length})",
                 ValidType.String => $"VARCHAR({info.Length})",
                 _ => throw new InvalidOperationException("unknown C# type")
             };

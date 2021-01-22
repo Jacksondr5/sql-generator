@@ -267,6 +267,7 @@ namespace Core.Test
         public ValidType Enum { get; set; }
         public double Double { get; set; }
         public string String { get; set; }
+        public List<int> List { get; set; }
     }
 
     internal class ValidTypeDataSourceAttribute : Attribute, ITestDataSource

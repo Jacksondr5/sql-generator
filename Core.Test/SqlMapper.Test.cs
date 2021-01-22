@@ -115,6 +115,7 @@ namespace Core.Test
             { ValidType.Double, "DECIMAL" },
             { ValidType.Enum, "INT" },
             { ValidType.Int, "INT" },
+            { ValidType.List, "VARCHAR" },
             { ValidType.String, "VARCHAR" },
         };
         public override List<object[]> SqlTypes
@@ -142,7 +143,9 @@ namespace Core.Test
         private List<object[]> _sqlTypes = new List<object[]>()
         {
             new object[] { ValidType.String, "5", $"VARCHAR(5)" },
-            new object[] { ValidType.String, "MAX", $"VARCHAR(MAX)" }
+            new object[] { ValidType.String, "MAX", $"VARCHAR(MAX)" },
+            new object[] { ValidType.List, "5", $"VARCHAR(5)" },
+            new object[] { ValidType.List, "MAX", $"VARCHAR(MAX)" }
         };
         public override List<object[]> SqlTypes { get { return _sqlTypes; } }
     }

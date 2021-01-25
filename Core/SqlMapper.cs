@@ -20,6 +20,10 @@ namespace Core
                 ValidType.String => $"VARCHAR({info.Length})",
                 _ => throw new InvalidOperationException("unknown C# type")
             };
+            if (info.IsNullable)
+                info.SqlType += " NULL";
+            else
+                info.SqlType += " NOT NULL";
             return info;
         }
     }

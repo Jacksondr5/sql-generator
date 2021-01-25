@@ -36,7 +36,9 @@ namespace Core
                         CSharpName = x.Name,
                         CSharpType = x.PropertyType,
                         ValidType = GetValidType(x.PropertyType),
-                        IsIdProperty = x.Name.Equals(_idPropertyName)
+                        IsIdProperty = x.Name.Equals(_idPropertyName),
+                        IsNullable =
+                            Nullable.GetUnderlyingType(x.PropertyType) != null
                     })
                     .Where(x => x.ValidType != ValidType.InvalidType)
                     .ToList(),
@@ -60,6 +62,16 @@ namespace Core
                         .IsIdProperty = true;
                 }
             }
+            var identityProperties = info.Properties.Where(x => x.IsIdProperty);
+            foreach (var property in identityProperties)
+            {
+                if (property.IsNullable)
+                    throw new InvalidInputException(
+                        InvalidInputExceptionNullableIdProperty(
+                            property.CSharpName
+                        )
+                    );
+            }
             return info;
         }
 
@@ -77,6 +89,8 @@ namespace Core
 
         private static ValidType GetValidType(Type type)
         {
+            var name = type.Name;
+            var underlyingType = Nullable.GetUnderlyingType(type);
             if (type.IsEnum)
                 return ValidType.Enum;
             else if (
@@ -84,7 +98,10 @@ namespace Core
                 type.GetGenericTypeDefinition() == typeof(List<>)
             )
                 return ValidType.List;
-            return type.Name switch
+            else if (underlyingType != null)
+                name = underlyingType.Name;
+
+            return name switch
             {
                 "Int32" => ValidType.Int,
                 "Boolean" => ValidType.Bool,
@@ -98,6 +115,9 @@ namespace Core
 
         public static string InvalidInputExceptionIdProperty(string property) =>
             $"The given ID property {property} does not exist";
+        public static string InvalidInputExceptionNullableIdProperty(
+            string property
+        ) => $"The ID property {property} cannot be nullable";
         public const string NoIdPropertyMessage =
             "What property/properties should be considered the ID property/properties?  Enter a comma deliniated list of ID properties";
     }
@@ -115,6 +135,7 @@ namespace Core
         public string CSharpName { get; set; } = "";
         public Type CSharpType { get; set; } = typeof(BadType);
         public bool IsIdProperty { get; set; }
+        public bool IsNullable { get; set; }
         public string Length { get; set; } = "";
         public int Precision { get; set; }
         public int Scale { get; set; }

@@ -151,8 +151,6 @@ namespace Core
 
         private static string FormatSelect(PropertyInfo info) =>
             $"\t\t[{info.CSharpName}] = [{info.SqlName}]";
-
-        // private static string FormatInsert()
     }
 
     public class SqlFile

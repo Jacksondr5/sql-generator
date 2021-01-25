@@ -231,6 +231,78 @@ namespace Core.Test
                 .Should()
                 .NotContain(notExpectedName);
         }
+
+        [TestMethod]
+        public void GetFieldInfoFromType_PropertyIsNullable_ShouldSetFlagAsTrue()
+        {
+            //Act
+            var actual =
+                _inspector.GetFieldInfoFromType(typeof(SimpleTestClass));
+
+            //Assert
+            actual.Properties
+                .Should()
+                .Contain(x =>
+                    x.IsNullable == true &&
+                    x.CSharpName.Equals(nameof(SimpleTestClass.NullableInt))
+                );
+        }
+
+        [TestMethod]
+        public void GetFieldInfoFromType_PropertyIsNotNullable_ShouldSetFlagAsFalse()
+        {
+            //Act
+            var actual =
+                _inspector.GetFieldInfoFromType(typeof(SimpleTestClass));
+
+            //Assert
+            actual.Properties
+                .Should()
+                .Contain(x =>
+                    x.IsNullable == false &&
+                    x.CSharpName.Equals(nameof(SimpleTestClass.Id))
+                );
+        }
+
+        [TestMethod]
+        public void GetFieldInfoFromType_IdentityPropertyIsNullable_ShouldThrowException()
+        {
+            //Act
+            Action act = () =>
+                _inspector.GetFieldInfoFromType(typeof(NullableIdTestClass));
+
+            //Assert
+            act
+                .Should()
+                .ThrowExactly<InvalidInputException>()
+                .WithMessage(
+                    ClassInspector.InvalidInputExceptionNullableIdProperty("Id")
+                );
+        }
+
+        [TestMethod]
+        public void GetFieldInfoFromType_UserSpecifiesIdentityPropertyAsNullable_ShouldThrowException()
+        {
+            //Assemble
+            var idProperty = "NullableIntProperty";
+            _userInputRepoMock
+                .Setup(x => x.GetUserInput(ClassInspector.NoIdPropertyMessage))
+                .Returns(idProperty);
+
+            //Act
+            Action act = () =>
+                _inspector.GetFieldInfoFromType(typeof(MissingIdTestClass));
+
+            //Assert
+            act.
+                Should()
+                .ThrowExactly<InvalidInputException>()
+                .WithMessage(
+                    ClassInspector.InvalidInputExceptionNullableIdProperty(
+                        idProperty
+                    )
+                );
+        }
     }
 
     internal class TestClassWithComplexProperty
@@ -244,6 +316,7 @@ namespace Core.Test
         public int Id { get; set; }
         public string PublicTestString { get; set; }
         private string PrivateTestString { get; set; }
+        public int? NullableInt { get; set; }
     }
 
     internal class InvalidIdTestClass
@@ -251,10 +324,16 @@ namespace Core.Test
         public string Id { get; set; }
     }
 
+    internal class NullableIdTestClass
+    {
+        public int? Id { get; set; }
+    }
+
     internal class MissingIdTestClass
     {
         public string StringProperty { get; set; }
         public int IntProperty { get; set; }
+        public int? NullableIntProperty { get; set; }
     }
 
     internal class AllValidValuesTestClass

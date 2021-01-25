@@ -67,7 +67,7 @@ namespace Core.Test
             var actual = SqlMapper.MapPropertyToSql(property);
 
             //Assert
-            actual.SqlType.Should().Be(expected);
+            actual.SqlType.Should().StartWith(expected);
         }
 
         [DataTestMethod]
@@ -86,6 +86,44 @@ namespace Core.Test
                 Scale = scale,
                 Precision = precision
             };
+
+            //Act
+            var actual = SqlMapper.MapPropertyToSql(property);
+
+            //Assert
+            actual.SqlType.Should().StartWith(expected);
+        }
+
+        [TestMethod]
+        public void MapPropertyToSql_TypeIsNullable_ShouldIncludeNull()
+        {
+            //Assemble
+            var property = new PropertyInfo
+            {
+                CSharpName = "PublicTestString",
+                IsNullable = true,
+                ValidType = ValidType.Int,
+            };
+            var expected = "INT NULL";
+
+            //Act
+            var actual = SqlMapper.MapPropertyToSql(property);
+
+            //Assert
+            actual.SqlType.Should().Be(expected);
+        }
+
+        [TestMethod]
+        public void MapPropertyToSql_TypeIsNotNullable_ShouldIncludeNotNull()
+        {
+            //Assemble
+            var property = new PropertyInfo
+            {
+                CSharpName = "PublicTestString",
+                IsNullable = false,
+                ValidType = ValidType.Int,
+            };
+            var expected = "INT NOT NULL";
 
             //Act
             var actual = SqlMapper.MapPropertyToSql(property);
@@ -128,14 +166,17 @@ namespace Core.Test
                     .Select(x => new object[]
                     {
                         x,
-                        _sqlTypes.GetValueOrDefault(x) ??
-                            throw new InvalidOperationException(
-                                $"The type {x} is missing from the test dictionary"
-                            )
+                        _sqlTypes.GetValueOrDefault(x) ?? Throw(x)
                     })
                     .ToList();
             }
         }
+
+        //VS Code didn't like this being inline, text coloring got messed up
+        private static string Throw(ValidType x) =>
+            throw new InvalidOperationException(
+                $"The type {x} is missing from the test dictionary"
+            );
     }
 
     internal class TypeWithLengthDataSourceAttribute : BaseTypeDataSourceAttribute

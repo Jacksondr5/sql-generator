@@ -107,8 +107,8 @@ namespace Core.Test
             builder.Append($"AS{_nl}");
             builder.Append($"BEGIN{_nl}");
             builder.Append($"\tINSERT {_schema}.{_info.SqlClassName} ({_nl}");
-            builder.Append($"\t\t{_info.Properties[1].SqlName},{_nl}");
-            builder.Append($"\t\t{_info.Properties[2].SqlName}{_nl}");
+            builder.Append($"\t\t[{_info.Properties[1].SqlName}],{_nl}");
+            builder.Append($"\t\t[{_info.Properties[2].SqlName}]{_nl}");
             builder.Append($"\t){_nl}");
             builder.Append($"\tVALUES ({_nl}");
             builder.Append($"\t\t@{_info.Properties[1].SqlName},{_nl}");

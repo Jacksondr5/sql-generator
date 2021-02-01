@@ -61,7 +61,7 @@ namespace Core
             );
             createBuilder.AppendJoin(
                 $",{_nl}",
-                nonIdProperties.Select(x => $"\t\t{x.SqlName}")
+                nonIdProperties.Select(x => $"\t\t[{x.SqlName}]")
             );
             createBuilder.Append($"{_nl}\t){_nl}");
             createBuilder.Append($"\tVALUES ({_nl}");

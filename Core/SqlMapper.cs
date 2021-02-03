@@ -5,9 +5,17 @@ namespace Core
 {
     public class SqlMapper
     {
-        public static PropertyInfo MapPropertyToSql(PropertyInfo info)
+        public static PropertyInfo MapPropertyToSql(
+            PropertyInfo info,
+            string tableName
+        )
         {
             info.SqlName = info.CSharpName.ToSnakeCase();
+            if (
+                info.IsIdProperty &&
+                info.CSharpName.Equals(ClassInspector.IdPropertyName)
+            )
+                info.SqlName = info.SqlName.Insert(0, $"{tableName}_");
             info.SqlType = info.ValidType switch
             {
                 ValidType.Int => "INT",

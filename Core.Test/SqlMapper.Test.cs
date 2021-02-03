@@ -19,20 +19,20 @@ namespace Core.Test
                 CSharpName = "PublicTestString",
                 ValidType = ValidType.Int
             };
-            var expected = "public_test_string";
+            var expectedSqlName = "public_test_string";
 
             //Act
-            var actual = SqlMapper.MapPropertyToSql(property);
+            var actual = SqlMapper.MapPropertyToSql(property, "");
 
             //Assert
-            actual.SqlName.Should().Be(expected);
+            actual.SqlName.Should().Be(expectedSqlName);
         }
 
         [DataTestMethod]
         [BuiltInTypeDataSource]
         public void MapPropertyToSql_ShouldMapSqlType(
             ValidType type,
-            string expected
+            string expectedSqlType
         )
         {
             //Assemble
@@ -42,10 +42,10 @@ namespace Core.Test
             };
 
             //Act
-            var actual = SqlMapper.MapPropertyToSql(property);
+            var actual = SqlMapper.MapPropertyToSql(property, "");
 
             //Assert
-            actual.SqlType.Should().StartWith(expected);
+            actual.SqlType.Should().StartWith(expectedSqlType);
         }
 
         [DataTestMethod]
@@ -53,7 +53,7 @@ namespace Core.Test
         public void MapPropertyToSql_TypeHasLength_ShouldAddLengthToType(
             ValidType type,
             string length,
-            string expected
+            string expectedSqlType
         )
         {
             //Assemble
@@ -64,10 +64,10 @@ namespace Core.Test
             };
 
             //Act
-            var actual = SqlMapper.MapPropertyToSql(property);
+            var actual = SqlMapper.MapPropertyToSql(property, "");
 
             //Assert
-            actual.SqlType.Should().StartWith(expected);
+            actual.SqlType.Should().StartWith(expectedSqlType);
         }
 
         [DataTestMethod]
@@ -76,7 +76,7 @@ namespace Core.Test
             ValidType type,
             int precision,
             int scale,
-            string expected
+            string expectedSqlType
         )
         {
             //Assemble
@@ -88,10 +88,10 @@ namespace Core.Test
             };
 
             //Act
-            var actual = SqlMapper.MapPropertyToSql(property);
+            var actual = SqlMapper.MapPropertyToSql(property, "");
 
             //Assert
-            actual.SqlType.Should().StartWith(expected);
+            actual.SqlType.Should().StartWith(expectedSqlType);
         }
 
         [TestMethod]
@@ -104,13 +104,13 @@ namespace Core.Test
                 IsNullable = true,
                 ValidType = ValidType.Int,
             };
-            var expected = "INT NULL";
+            var expectedSqlType = "INT NULL";
 
             //Act
-            var actual = SqlMapper.MapPropertyToSql(property);
+            var actual = SqlMapper.MapPropertyToSql(property, "");
 
             //Assert
-            actual.SqlType.Should().Be(expected);
+            actual.SqlType.Should().Be(expectedSqlType);
         }
 
         [TestMethod]
@@ -123,13 +123,33 @@ namespace Core.Test
                 IsNullable = false,
                 ValidType = ValidType.Int,
             };
-            var expected = "INT NOT NULL";
+            var expectedSqlType = "INT NOT NULL";
 
             //Act
-            var actual = SqlMapper.MapPropertyToSql(property);
+            var actual = SqlMapper.MapPropertyToSql(property, "");
 
             //Assert
-            actual.SqlType.Should().Be(expected);
+            actual.SqlType.Should().Be(expectedSqlType);
+        }
+
+        [TestMethod]
+        public void MapPropertyToSql_PropertyIsNamedId_ShouldPrependTableNameToSqlName()
+        {
+            //Assemble
+            var property = new PropertyInfo
+            {
+                CSharpName = "Id",
+                IsIdProperty = true,
+                ValidType = ValidType.Int
+            };
+            var tableName = "test";
+            var expectedSqlName = $"{tableName}_id";
+
+            //Act
+            var actual = SqlMapper.MapPropertyToSql(property, tableName);
+
+            //Assert
+            actual.SqlName.Should().Be(expectedSqlName);
         }
     }
 

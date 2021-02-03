@@ -23,7 +23,7 @@ namespace Core
             var getBuilder = new StringBuilder();
             var getProcName = GetProcedureName(
                 schemaName,
-                info.SqlClassName,
+                info.SqlTableName,
                 "get_by_id"
             );
             getBuilder.Append(GetProcedureStart(
@@ -36,7 +36,7 @@ namespace Core
                 $",{_nl}",
                 nonIdProperties.Select(x => FormatSelect(x))
             );
-            getBuilder.Append($"{_nl}\tFROM {schemaName}.{info.SqlClassName}{_nl}");
+            getBuilder.Append($"{_nl}\tFROM {schemaName}.{info.SqlTableName}{_nl}");
             getBuilder.Append(
                 $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}{_nl}"
             );
@@ -50,14 +50,14 @@ namespace Core
             var createBuilder = new StringBuilder();
             var createProcName = GetProcedureName(
                 schemaName,
-                info.SqlClassName,
+                info.SqlTableName,
                 "insert"
             );
             createBuilder.Append(
                 GetProcedureStart(createProcName, nonIdProperties)
             );
             createBuilder.Append(
-                $"\tINSERT {schemaName}.{info.SqlClassName} ({_nl}"
+                $"\tINSERT {schemaName}.{info.SqlTableName} ({_nl}"
             );
             createBuilder.AppendJoin(
                 $",{_nl}",
@@ -81,14 +81,14 @@ namespace Core
             var updateBuilder = new StringBuilder();
             var updateProcName = GetProcedureName(
                 schemaName,
-                info.SqlClassName,
+                info.SqlTableName,
                 "update"
             );
             updateBuilder.Append(GetProcedureStart(
                 updateProcName,
                 nonIdProperties.Prepend(idProperty)
             ));
-            updateBuilder.Append($"\tUPDATE {schemaName}.{info.SqlClassName}{_nl}");
+            updateBuilder.Append($"\tUPDATE {schemaName}.{info.SqlTableName}{_nl}");
             updateBuilder.Append($"\tSET{_nl}");
             updateBuilder.AppendJoin(
                 $",{_nl}",
@@ -107,7 +107,7 @@ namespace Core
             var deleteBuilder = new StringBuilder();
             var deleteProcName = GetProcedureName(
                 schemaName,
-                info.SqlClassName,
+                info.SqlTableName,
                 "delete"
             );
             deleteBuilder.Append(GetProcedureStart(
@@ -115,7 +115,7 @@ namespace Core
                 new List<PropertyInfo> { idProperty }
             ));
             deleteBuilder.Append($"\tDELETE{_nl}");
-            deleteBuilder.Append($"\tFROM {schemaName}.{info.SqlClassName}{_nl}");
+            deleteBuilder.Append($"\tFROM {schemaName}.{info.SqlTableName}{_nl}");
             deleteBuilder.Append(
                 $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}{_nl}"
             );

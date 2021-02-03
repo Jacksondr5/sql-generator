@@ -37,7 +37,9 @@ namespace Core
             );
             typeInfo = UserInputService.GetUserInfo(typeInfo, _userInputRepo);
             typeInfo.Properties = typeInfo.Properties
-                .Select(x => SqlMapper.MapPropertyToSql(x))
+                .Select(x =>
+                    SqlMapper.MapPropertyToSql(x, typeInfo.SqlTableName)
+                )
                 .ToList();
             var schemaName = _userInputRepo.GetUserInput(GetSchemaMessage);
             var sqlFiles =

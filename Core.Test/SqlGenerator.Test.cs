@@ -39,7 +39,7 @@ namespace Core.Test
                     SqlType = "VARCHAR(128)"
                 },
             },
-            SqlClassName = "test_class"
+            SqlTableName = "test_class"
         };
         private const string _schema = "dbo";
 
@@ -48,7 +48,7 @@ namespace Core.Test
         {
             //Assemble
             var idProperty = _info.Properties[0];
-            var procName = $"{_schema}.{_info.SqlClassName}_get_by_id";
+            var procName = $"{_schema}.{_info.SqlTableName}_get_by_id";
             var builder = new StringBuilder();
             builder.Append(
                 $"CREATE OR ALTER PROCEDURE {procName}{_nl}"
@@ -66,7 +66,7 @@ namespace Core.Test
             builder.Append(
                 $"\t\t[{_info.Properties[2].CSharpName}] = [{_info.Properties[2].SqlName}]{_nl}"
             );
-            builder.Append($"\tFROM {_schema}.{_info.SqlClassName}{_nl}");
+            builder.Append($"\tFROM {_schema}.{_info.SqlTableName}{_nl}");
             builder.Append(
                 $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}{_nl}"
             );
@@ -93,7 +93,7 @@ namespace Core.Test
         public void GetCrudStoredProcedures_ShouldGenerateCreateProc()
         {
             //Assemble
-            var procName = $"{_schema}.{_info.SqlClassName}_insert";
+            var procName = $"{_schema}.{_info.SqlTableName}_insert";
             var builder = new StringBuilder();
             builder.Append(
                 $"CREATE OR ALTER PROCEDURE {procName}{_nl}"
@@ -106,7 +106,7 @@ namespace Core.Test
             );
             builder.Append($"AS{_nl}");
             builder.Append($"BEGIN{_nl}");
-            builder.Append($"\tINSERT {_schema}.{_info.SqlClassName} ({_nl}");
+            builder.Append($"\tINSERT {_schema}.{_info.SqlTableName} ({_nl}");
             builder.Append($"\t\t[{_info.Properties[1].SqlName}],{_nl}");
             builder.Append($"\t\t[{_info.Properties[2].SqlName}]{_nl}");
             builder.Append($"\t){_nl}");
@@ -140,7 +140,7 @@ namespace Core.Test
         {
             //Assemble
             var idProperty = _info.Properties[0];
-            var procName = $"{_schema}.{_info.SqlClassName}_update";
+            var procName = $"{_schema}.{_info.SqlTableName}_update";
             var builder = new StringBuilder();
             builder.Append(
                 $"CREATE OR ALTER PROCEDURE {procName}{_nl}"
@@ -154,7 +154,7 @@ namespace Core.Test
             );
             builder.Append($"AS{_nl}");
             builder.Append($"BEGIN{_nl}");
-            builder.Append($"\tUPDATE {_schema}.{_info.SqlClassName}{_nl}");
+            builder.Append($"\tUPDATE {_schema}.{_info.SqlTableName}{_nl}");
             builder.Append($"\tSET{_nl}");
             builder.Append(
                 $"\t\t[{_info.Properties[1].SqlName}] = @{_info.Properties[1].SqlName},{_nl}"
@@ -189,7 +189,7 @@ namespace Core.Test
         {
             //Assemble
             var idProperty = _info.Properties[0];
-            var procName = $"{_schema}.{_info.SqlClassName}_delete";
+            var procName = $"{_schema}.{_info.SqlTableName}_delete";
             var builder = new StringBuilder();
             builder.Append(
                 $"CREATE OR ALTER PROCEDURE {procName}{_nl}"
@@ -198,7 +198,7 @@ namespace Core.Test
             builder.Append($"AS{_nl}");
             builder.Append($"BEGIN{_nl}");
             builder.Append($"\tDELETE{_nl}");
-            builder.Append($"\tFROM {_schema}.{_info.SqlClassName}{_nl}");
+            builder.Append($"\tFROM {_schema}.{_info.SqlTableName}{_nl}");
             builder.Append(
                 $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}{_nl}"
             );

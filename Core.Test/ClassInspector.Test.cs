@@ -109,7 +109,7 @@ namespace Core.Test
                 _inspector.GetFieldInfoFromType(typeof(SimpleTestClass));
 
             //Assert
-            actual.SqlClassName.Should().Be(expected);
+            actual.SqlTableName.Should().Be(expected);
         }
 
         [TestMethod]

@@ -12,7 +12,7 @@ namespace Core
         private readonly IUserInputRepository _userInputRepo;
         public ClassInspector(IUserInputRepository userInputRepo) =>
             (_userInputRepo) = (userInputRepo);
-        private const string _idPropertyName = "Id";
+        public const string IdPropertyName = "Id";
         public ClassInfo GetFieldInfoFromType(
             Type type,
             bool includePrivateProperties = false
@@ -36,13 +36,13 @@ namespace Core
                         CSharpName = x.Name,
                         CSharpType = x.PropertyType,
                         ValidType = GetValidType(x.PropertyType),
-                        IsIdProperty = x.Name.Equals(_idPropertyName),
+                        IsIdProperty = x.Name.Equals(IdPropertyName),
                         IsNullable =
                             Nullable.GetUnderlyingType(x.PropertyType) != null
                     })
                     .Where(x => x.ValidType != ValidType.InvalidType)
                     .ToList(),
-                SqlClassName = type.Name.ToSnakeCase()
+                SqlTableName = type.Name.ToSnakeCase()
             };
             if (!info.Properties.Any(x => x.IsIdProperty))
             {
@@ -127,7 +127,7 @@ namespace Core
         public string CSharpClassName { get; set; } = "";
         public List<PropertyInfo> Properties { get; set; } =
             new List<PropertyInfo>();
-        public string SqlClassName { get; set; } = "";
+        public string SqlTableName { get; set; } = "";
     }
 
     public class PropertyInfo

@@ -1,7 +1,7 @@
 name: "0.1$(Rev:.r)"
 
 pool:
-  vmImage: "windows-latest"
+  vmImage: "ubuntu-latest"
 
 variables:
   CI: "true"
@@ -28,6 +28,8 @@ steps:
       projectKey: "01ffbbe9f7191614102d37f67c1148aedb773cb9"
       projectName: "sql-generator"
       projectVersion: $(Build.BuildNumber)
+      extraProperties: |
+        sonar.coverage.exclusions=**/ConsoleApp/**
   - task: DotNetCoreCLI@2
     displayName: dotnet restore
     inputs:

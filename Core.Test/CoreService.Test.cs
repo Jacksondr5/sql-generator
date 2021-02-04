@@ -82,7 +82,7 @@ namespace Core.Test
             //Assert
             _fileWriterMock.Verify(
                 x => x.WriteFile(It.IsRegex("output.*"), It.IsAny<string>()),
-                Times.Exactly(5)
+                Times.Exactly(6)
             );
         }
 

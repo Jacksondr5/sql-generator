@@ -25,9 +25,29 @@ namespace Core
                 .OrderBy(x => x.SqlName);
             _orderedProperties = _idProperties.Concat(_nonIdProperties);
         }
+
         public IEnumerable<SqlFile> GetSql()
         {
             var builder = new StringBuilder();
+            builder.Append($"CREATE TABLE {_classInfo.SqlTableName} ({_nl}");
+            builder.AppendJoin(
+                _nl,
+                _orderedProperties.Select(x => GetColumnDefinition(x))
+            );
+            builder.Append(_nl);
+            builder.Append(
+                $"\tCONSTRAINT pk_{_classInfo.SqlTableName} PRIMARY KEY ("
+            );
+            builder.AppendJoin(", ", _idProperties.Select(x => x.SqlName));
+            builder.Append($"){_nl}");
+            builder.Append(")");
+            yield return new SqlFile
+            {
+                Name = $"{_schemaName}.{_classInfo.SqlTableName}.sql",
+                Content = builder.ToString()
+            };
+            builder.Clear();
+
             var getByIdProcName = GetProcedureName("get_by_id");
             builder.Append(
                 GetProcedureStart(getByIdProcName, _idProperties)
@@ -121,6 +141,12 @@ namespace Core
                 Name = $"{deleteProcName}.sql",
                 Content = builder.ToString()
             };
+        }
+
+        private static string GetColumnDefinition(PropertyInfo property)
+        {
+            var nullDefiniton = property.IsNullable ? "NULL" : "NOT NULL";
+            return $"\t{property.SqlName} {property.SqlType} {nullDefiniton},";
         }
 
         private static string GetProcedureStart(

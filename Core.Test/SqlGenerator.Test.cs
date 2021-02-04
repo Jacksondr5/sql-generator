@@ -273,6 +273,44 @@ namespace Core.Test
                 .Be(expected.Content);
         }
 
+        [TestMethod]
+        public void GetSql_ShouldGenerateTableDefiniton()
+        {
+            var idProperty = _simpleInfo.Properties[0];
+            var procName = $"{_schema}.{_simpleInfo.SqlTableName}";
+            var builder = new StringBuilder();
+            builder.Append($"CREATE TABLE {_simpleInfo.SqlTableName} ({_nl}");
+            builder.Append(
+                $"\t{idProperty.SqlName} {idProperty.SqlType} NOT NULL,{_nl}"
+            );
+            builder.Append(
+                $"\t{_simpleInfo.Properties[1].SqlName} {_simpleInfo.Properties[1].SqlType} NOT NULL,{_nl}"
+            );
+            builder.Append(
+                $"\t{_simpleInfo.Properties[2].SqlName} {_simpleInfo.Properties[2].SqlType} NOT NULL,{_nl}"
+            );
+            builder.Append(
+                $"\tCONSTRAINT pk_{_simpleInfo.SqlTableName} PRIMARY KEY ({idProperty.SqlName}){_nl}"
+            );
+            builder.Append(")");
+            var expected = new SqlFile
+            {
+                Content = builder.ToString(),
+                Name = $"{procName}.sql"
+            };
+
+            //Act
+            var actual = _generator.GetSql();
+
+            //Assert
+            actual.Should().Contain(x => x.Name.Equals(expected.Name));
+            actual
+                .Where(x => x.Name.Equals(expected.Name))
+                .First().Content
+                .Should()
+                .Be(expected.Content);
+        }
+
         private static ClassInfo _multipleIdsInfo = new ClassInfo
         {
             CSharpClassName = "TestClass",
@@ -474,6 +512,121 @@ namespace Core.Test
                 Name = $"{procName}.sql"
             };
             var generator = new SqlGenerator(_multipleIdsInfo, _schema);
+
+            //Act
+            var actual = generator.GetSql();
+
+            //Assert
+            actual.Should().Contain(x => x.Name.Equals(expected.Name));
+            actual
+                .Where(x => x.Name.Equals(expected.Name))
+                .First().Content
+                .Should()
+                .Contain(expected.Content);
+        }
+
+        [TestMethod]
+        public void GetSql_MultipleIdParameters_ShouldGenerateTableDefiniton()
+        {
+            var idProperties =
+                _multipleIdsInfo.Properties.Where(x => x.IsIdProperty).ToList();
+            var builder = new StringBuilder();
+            builder.Append(
+                $"\t{idProperties[0].SqlName} {idProperties[0].SqlType} NOT NULL,{_nl}"
+            );
+            builder.Append(
+                $"\t{idProperties[1].SqlName} {idProperties[1].SqlType} NOT NULL,{_nl}"
+            );
+            builder.Append(
+                $"\t{_multipleIdsInfo.Properties[2].SqlName} {_multipleIdsInfo.Properties[2].SqlType} NOT NULL,{_nl}"
+            );
+            builder.Append(
+                $"\tCONSTRAINT pk_{_multipleIdsInfo.SqlTableName} PRIMARY KEY ({idProperties[0].SqlName}, {idProperties[1].SqlName})"
+            );
+            var expected = new SqlFile
+            {
+                Content = builder.ToString(),
+                Name = $"{_schema}.{_multipleIdsInfo.SqlTableName}.sql"
+            };
+            var generator = new SqlGenerator(_multipleIdsInfo, _schema);
+
+            //Act
+            var actual = generator.GetSql();
+
+            //Assert
+            actual.Should().Contain(x => x.Name.Equals(expected.Name));
+            actual
+                .Where(x => x.Name.Equals(expected.Name))
+                .First().Content
+                .Should()
+                .Contain(expected.Content);
+        }
+
+        [TestMethod]
+        public void GetSql_PropertyIsNullable_TableDefinitionShouldHaveNullableColumn()
+        {
+            //Assemble
+            var type = new ClassInfo
+            {
+                CSharpClassName = "TestClass",
+                Properties = new List<PropertyInfo>
+                {
+                    new PropertyInfo
+                    {
+                        CSharpName = "Id",
+                        ValidType = ValidType.Int,
+                        IsNullable = true,
+                        SqlName = "test_property",
+                        SqlType = "INT"
+                    },
+                },
+                SqlTableName = "test_class"
+            };
+            var expected = new SqlFile
+            {
+                Content = "\ttest_property INT NULL",
+                Name = $"{_schema}.{_multipleIdsInfo.SqlTableName}.sql"
+            };
+            var generator = new SqlGenerator(type, _schema);
+
+            //Act
+            var actual = generator.GetSql();
+
+            //Assert
+            actual.Should().Contain(x => x.Name.Equals(expected.Name));
+            actual
+                .Where(x => x.Name.Equals(expected.Name))
+                .First().Content
+                .Should()
+                .Contain(expected.Content);
+        }
+
+        [TestMethod]
+        public void GetSql_PropertyIsNonNullable_TableDefinitionShouldHaveNullableColumn()
+        {
+            //Assemble
+            var type = new ClassInfo
+            {
+                CSharpClassName = "TestClass",
+                Properties = new List<PropertyInfo>
+                {
+                    new PropertyInfo
+                    {
+                        CSharpName = "Id",
+                        ValidType = ValidType.Int,
+                        IsNullable = false,
+                        SqlName = "test_property",
+                        SqlType = "INT"
+                    },
+                },
+                SqlTableName = "test_class"
+            };
+            var expected = new SqlFile
+            {
+                Content = "\ttest_property INT NOT NULL",
+                Name = $"{_schema}.{_multipleIdsInfo.SqlTableName}.sql"
+            };
+            var generator = new SqlGenerator(type, _schema);
 
             //Act
             var actual = generator.GetSql();

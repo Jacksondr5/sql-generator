@@ -3,6 +3,23 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
+    <PackAsTool>true</PackAsTool>
+    <PackageId>Jacksondr5.SqlGenerator</PackageId>
+    <PackageTitle>Jacksondr5.SqlGenerator</PackageTitle>
+    <Authors>Jackson Miller</Authors>
+    <Company>Jackson Miller</Company>
+    <Title>Sql Generator</Title>
+    <License>../LICENSE</License>
+    <ToolCommandName>generate-sql</ToolCommandName>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <copyright>Copyright ©2021 Jackson Miller</copyright>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/Jacksondr5/sql-generator</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Jacksondr5/sql-generator</PackageProjectUrl>
+    <Description>A personal SQL generator used to generate SQL from a C# class with an aim to be used in Dapper</Description>
+    <Product>Jacksondr5.SqlGenerator</Product>
+    <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,6 +30,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

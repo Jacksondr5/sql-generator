@@ -49,7 +49,22 @@ steps:
       command: "test"
       projects: $(solution)
       arguments: "--nologo --no-build -c $(buildConfiguration) -s ./UnitTest.runsettings"
+  - task: DotNetCoreCLI@2
+    displayName: Create NuGet Package
+    inputs:
+      packagesToPack: "ConsoleApp/ConsoleApp.csproj"
+      nobuild: true
+      versioningScheme: "byBuildNumber"
   - task: SonarCloudAnalyze@1
   - task: SonarCloudPublish@1
     inputs:
       pollingTimeoutSec: "300"
+  - task: NuGetAuthenticate@0
+    inputs:
+      nuGetServiceConnections: "sql-generator NuGet Connection"
+  - task: NuGetCommand@2
+    inputs:
+      command: "push"
+      packagesToPush: "$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg"
+      nuGetFeedType: "external"
+      publishFeedCredentials: "sql-generator NuGet Connection"

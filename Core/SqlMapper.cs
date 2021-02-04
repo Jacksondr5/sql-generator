@@ -3,7 +3,7 @@ using System;
 
 namespace Core
 {
-    public class SqlMapper
+    public static class SqlMapper
     {
         public static PropertyInfo MapPropertyToSql(
             PropertyInfo info,

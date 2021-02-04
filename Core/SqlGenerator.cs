@@ -40,7 +40,7 @@ namespace Core
             );
             builder.AppendJoin(", ", _idProperties.Select(x => x.SqlName));
             builder.Append($"){_nl}");
-            builder.Append(")");
+            builder.Append(')');
             yield return new SqlFile
             {
                 Name = $"{_schemaName}.{_classInfo.SqlTableName}.sql",

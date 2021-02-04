@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,7 +18,7 @@ namespace Core
         ) => (_classObtainer, _fileWriter, _userInputRepo) =
             (classObtainer, fileWriter, userInputRepo);
 
-        public async Task GenerateSqlForType(
+        public Task GenerateSqlForType(
             string assemblyPath,
             string typeName,
             string outputPath,
@@ -44,6 +45,14 @@ namespace Core
             var schemaName = _userInputRepo.GetUserInput(GetSchemaMessage);
             var sqlGenerator = new SqlGenerator(typeInfo, schemaName);
             var sqlFiles = sqlGenerator.GetSql();
+            return GenerateSqlForTypeInternal(outputPath, sqlFiles);
+        }
+
+        private async Task GenerateSqlForTypeInternal(
+            string outputPath,
+            IEnumerable<SqlFile> sqlFiles
+        )
+        {
             foreach (var sqlFile in sqlFiles)
                 await _fileWriter.WriteFile(
                     Path.Join(outputPath, sqlFile.Name),

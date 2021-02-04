@@ -59,12 +59,18 @@ steps:
   - task: SonarCloudPublish@1
     inputs:
       pollingTimeoutSec: "300"
-  - task: NuGetAuthenticate@0
-    inputs:
-      nuGetServiceConnections: "sql-generator NuGet Connection"
-  - task: NuGetCommand@2
+  # - task: NuGetAuthenticate@0
+  #   inputs:
+  #     nuGetServiceConnections: "sql-generator NuGet Connection"
+  # - task: NuGetCommand@2
+  #   inputs:
+  #     command: "push"
+  #     packagesToPush: "$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg"
+  #     nuGetFeedType: "external"
+  #     publishFeedCredentials: "sql-generator NuGet Connection"
+  - task: DotNetCoreCLI@2
     inputs:
       command: "push"
-      packagesToPush: "$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg"
+      packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg"
       nuGetFeedType: "external"
       publishFeedCredentials: "sql-generator NuGet Connection"

@@ -74,7 +74,7 @@ namespace Core.Test
         }
 
         [TestMethod]
-        public async Task GenerateSqlForType_ShouldWriteFSqlFiles()
+        public async Task GenerateSqlForType_ShouldWriteSqlFiles()
         {
             //Act
             await _service.GenerateSqlForType("path", "type", "output", false);
@@ -82,7 +82,7 @@ namespace Core.Test
             //Assert
             _fileWriterMock.Verify(
                 x => x.WriteFile(It.IsRegex("output.*"), It.IsAny<string>()),
-                Times.Exactly(4)
+                Times.Exactly(5)
             );
         }
 

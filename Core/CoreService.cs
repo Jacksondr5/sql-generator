@@ -42,8 +42,8 @@ namespace Core
                 )
                 .ToList();
             var schemaName = _userInputRepo.GetUserInput(GetSchemaMessage);
-            var sqlFiles =
-                SqlGenerator.GetCrudStoredProcedures(typeInfo, schemaName);
+            var sqlGenerator = new SqlGenerator(typeInfo, schemaName);
+            var sqlFiles = sqlGenerator.GetSql();
             foreach (var sqlFile in sqlFiles)
                 await _fileWriter.WriteFile(
                     Path.Join(outputPath, sqlFile.Name),

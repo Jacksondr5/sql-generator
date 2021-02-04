@@ -8,122 +8,118 @@ namespace Core
     public class SqlGenerator
     {
         private static readonly string _nl = Environment.NewLine;
-        public static IEnumerable<SqlFile> GetCrudStoredProcedures(
-            ClassInfo info,
-            string schemaName
-        )
+        private readonly ClassInfo _classInfo;
+        private readonly string _schemaName;
+        private readonly IEnumerable<PropertyInfo> _idProperties;
+        private readonly IEnumerable<PropertyInfo> _nonIdProperties;
+        private readonly IEnumerable<PropertyInfo> _orderedProperties;
+        public SqlGenerator(ClassInfo info, string schemaName)
         {
-            var idProperty = info.Properties.Find(x => x.IsIdProperty);
-            if (idProperty == null)
-                throw new InvalidOperationException("shouldn't happen");
-            var nonIdProperties = info.Properties
-                .FindAll(x => !x.IsIdProperty)
-                .OrderBy(x => x.CSharpName);
-
-            var getBuilder = new StringBuilder();
-            var getProcName = GetProcedureName(
-                schemaName,
-                info.SqlTableName,
-                "get_by_id"
+            _classInfo = info;
+            _schemaName = schemaName;
+            _idProperties = info.Properties
+                .Where(x => x.IsIdProperty)
+                .OrderBy(x => x.SqlName);
+            _nonIdProperties = info.Properties
+                .Where(x => !x.IsIdProperty)
+                .OrderBy(x => x.SqlName);
+            _orderedProperties = _idProperties.Concat(_nonIdProperties);
+        }
+        public IEnumerable<SqlFile> GetSql()
+        {
+            var builder = new StringBuilder();
+            var getByIdProcName = GetProcedureName("get_by_id");
+            builder.Append(
+                GetProcedureStart(getByIdProcName, _idProperties)
             );
-            getBuilder.Append(GetProcedureStart(
-                getProcName,
-                new List<PropertyInfo> { idProperty }
-            ));
-            getBuilder.Append($"\tSELECT{_nl}");
-            getBuilder.Append($"{FormatSelect(idProperty)},{_nl}");
-            getBuilder.AppendJoin(
-                $",{_nl}",
-                nonIdProperties.Select(x => FormatSelect(x))
-            );
-            getBuilder.Append($"{_nl}\tFROM {schemaName}.{info.SqlTableName}{_nl}");
-            getBuilder.Append(
-                $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}{_nl}"
-            );
-            getBuilder.Append("END");
+            builder.Append(GetSelectSql());
+            builder.Append(GetWhereByIdClause());
+            builder.Append("END");
             yield return new SqlFile
             {
-                Name = $"{getProcName}.sql",
-                Content = getBuilder.ToString()
+                Name = $"{getByIdProcName}.sql",
+                Content = builder.ToString()
             };
+            builder.Clear();
 
-            var createBuilder = new StringBuilder();
-            var createProcName = GetProcedureName(
-                schemaName,
-                info.SqlTableName,
-                "insert"
+            var getAllProcName = GetProcedureName("get_all");
+            builder.Append(
+                GetProcedureStart(getAllProcName, new List<PropertyInfo>())
             );
-            createBuilder.Append(
-                GetProcedureStart(createProcName, nonIdProperties)
+            builder.Append(GetSelectSql());
+            builder.Append("END");
+            yield return new SqlFile
+            {
+                Name = $"{getAllProcName}.sql",
+                Content = builder.ToString()
+            };
+            builder.Clear();
+
+            var createProcName = GetProcedureName("insert");
+            builder.Append(
+                GetProcedureStart(createProcName, _nonIdProperties)
             );
-            createBuilder.Append(
-                $"\tINSERT {schemaName}.{info.SqlTableName} ({_nl}"
+            builder.Append(
+                $"\tINSERT {_schemaName}.{_classInfo.SqlTableName} ({_nl}"
             );
-            createBuilder.AppendJoin(
+            builder.AppendJoin(
                 $",{_nl}",
-                nonIdProperties.Select(x => $"\t\t[{x.SqlName}]")
+                _nonIdProperties.Select(x => $"\t\t[{x.SqlName}]")
             );
-            createBuilder.Append($"{_nl}\t){_nl}");
-            createBuilder.Append($"\tVALUES ({_nl}");
-            createBuilder.AppendJoin(
+            builder.Append($"{_nl}\t){_nl}");
+            builder.Append($"\tVALUES ({_nl}");
+            builder.AppendJoin(
                 $",{_nl}",
-                nonIdProperties.Select(x => $"\t\t@{x.SqlName}")
+                _nonIdProperties.Select(x => $"\t\t@{x.SqlName}")
             );
-            createBuilder.Append($"{_nl}\t);{_nl}{_nl}");
-            createBuilder.Append($"\tSELECT SCOPE_IDENTITY(){_nl}");
-            createBuilder.Append("END");
+            builder.Append($"{_nl}\t);{_nl}{_nl}");
+            builder.Append($"\tSELECT SCOPE_IDENTITY(){_nl}");
+            builder.Append("END");
             yield return new SqlFile
             {
                 Name = $"{createProcName}.sql",
-                Content = createBuilder.ToString()
+                Content = builder.ToString()
             };
+            builder.Clear();
 
-            var updateBuilder = new StringBuilder();
-            var updateProcName = GetProcedureName(
-                schemaName,
-                info.SqlTableName,
-                "update"
-            );
-            updateBuilder.Append(GetProcedureStart(
+            var updateProcName = GetProcedureName("update");
+            builder.Append(GetProcedureStart(
                 updateProcName,
-                nonIdProperties.Prepend(idProperty)
+                _orderedProperties
             ));
-            updateBuilder.Append($"\tUPDATE {schemaName}.{info.SqlTableName}{_nl}");
-            updateBuilder.Append($"\tSET{_nl}");
-            updateBuilder.AppendJoin(
+            builder.Append(
+                $"\tUPDATE {_schemaName}.{_classInfo.SqlTableName}{_nl}"
+            );
+            builder.Append($"\tSET{_nl}");
+            builder.AppendJoin(
                 $",{_nl}",
-                nonIdProperties.Select(x => $"\t\t[{x.SqlName}] = @{x.SqlName}")
+                _nonIdProperties.Select(x => $"\t\t[{x.SqlName}] = @{x.SqlName}")
             );
-            updateBuilder.Append(
-                $"{_nl}\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}{_nl}"
-            );
-            updateBuilder.Append("END");
+            builder.Append($"{_nl}");
+            builder.Append(GetWhereByIdClause());
+            builder.Append("END");
             yield return new SqlFile
             {
                 Name = $"{updateProcName}.sql",
-                Content = updateBuilder.ToString()
+                Content = builder.ToString()
             };
+            builder.Clear();
 
-            var deleteBuilder = new StringBuilder();
-            var deleteProcName = GetProcedureName(
-                schemaName,
-                info.SqlTableName,
-                "delete"
-            );
-            deleteBuilder.Append(GetProcedureStart(
+            var deleteProcName = GetProcedureName("delete");
+            builder.Append(GetProcedureStart(
                 deleteProcName,
-                new List<PropertyInfo> { idProperty }
+                _idProperties
             ));
-            deleteBuilder.Append($"\tDELETE{_nl}");
-            deleteBuilder.Append($"\tFROM {schemaName}.{info.SqlTableName}{_nl}");
-            deleteBuilder.Append(
-                $"\tWHERE [{idProperty.SqlName}] = @{idProperty.SqlName}{_nl}"
+            builder.Append($"\tDELETE{_nl}");
+            builder.Append(
+                $"\tFROM {_schemaName}.{_classInfo.SqlTableName}{_nl}"
             );
-            deleteBuilder.Append("END");
+            builder.Append(GetWhereByIdClause());
+            builder.Append("END");
             yield return new SqlFile
             {
                 Name = $"{deleteProcName}.sql",
-                Content = deleteBuilder.ToString()
+                Content = builder.ToString()
             };
         }
 
@@ -138,19 +134,45 @@ namespace Core
             var builder = new StringBuilder();
             builder.Append("CREATE OR ALTER PROCEDURE ");
             builder.Append($"{procedureName}{_nl}");
-            builder.AppendJoin($",{_nl}", parameterDeclarations);
-            builder.Append($"{_nl}AS{_nl}BEGIN{_nl}");
+            if (parameterDeclarations.Any())
+            {
+                builder.AppendJoin($",{_nl}", parameterDeclarations);
+                builder.Append($"{_nl}");
+            }
+            builder.Append($"AS{_nl}BEGIN{_nl}");
             return builder.ToString();
         }
 
-        private static string GetProcedureName(
-            string schemaName,
-            string tableName,
-            string procedureNameSuffix
-        ) => $"{schemaName}.{tableName}_{procedureNameSuffix}";
+        private string GetProcedureName(string procedureNameSuffix) =>
+            $"{_schemaName}.{_classInfo.SqlTableName}_{procedureNameSuffix}";
 
-        private static string FormatSelect(PropertyInfo info) =>
-            $"\t\t[{info.CSharpName}] = [{info.SqlName}]";
+        private string GetSelectSql()
+        {
+            var builder = new StringBuilder();
+            builder.Append($"\tSELECT{_nl}");
+            builder.AppendJoin(
+                $",{_nl}",
+                _orderedProperties.Select(
+                    x => $"\t\t[{x.CSharpName}] = [{x.SqlName}]"
+                )
+            );
+            builder.Append(
+                $"{_nl}\tFROM {_schemaName}.{_classInfo.SqlTableName}{_nl}"
+            );
+            return builder.ToString();
+        }
+
+        private string GetWhereByIdClause()
+        {
+            var builder = new StringBuilder();
+            builder.Append($"\tWHERE{_nl}");
+            builder.AppendJoin(
+                $",{_nl}",
+                _idProperties.Select(x => $"\t\t[{x.SqlName}] = @{x.SqlName}")
+            );
+            builder.Append(_nl);
+            return builder.ToString();
+        }
     }
 
     public class SqlFile

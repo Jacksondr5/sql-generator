@@ -52,6 +52,7 @@ steps:
   - task: DotNetCoreCLI@2
     displayName: Create NuGet Package
     inputs:
+      command: "pack"
       packagesToPack: "ConsoleApp/ConsoleApp.csproj"
       nobuild: true
       versioningScheme: "byBuildNumber"

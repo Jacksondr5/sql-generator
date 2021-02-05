@@ -12,15 +12,18 @@ variables:
 
 steps:
   - task: UseDotNet@2
+    displayName: Install .NET 5.0.x
     inputs:
       packageType: "sdk"
       version: "5.0.x"
   # Needed for SonarQube
   - task: UseDotNet@2
+    displayName: Install .NET Core 2.2.x for SonarCloud
     inputs:
       packageType: "sdk"
       version: "2.2.x"
   - task: SonarCloudPrepare@1
+    displayName: Prepare SonarCloud Analysis
     inputs:
       SonarCloud: "SonarCloud"
       organization: "jacksondr5"
@@ -31,7 +34,7 @@ steps:
       extraProperties: |
         sonar.coverage.exclusions=**/ConsoleApp/**
   - task: DotNetCoreCLI@2
-    displayName: dotnet restore
+    displayName: Restore Packages
     inputs:
       command: "restore"
       projects: $(solution)
@@ -57,10 +60,13 @@ steps:
       nobuild: true
       versioningScheme: "byBuildNumber"
   - task: SonarCloudAnalyze@1
+    displayName: Run SonarCloud Analysis
   - task: SonarCloudPublish@1
+    displayName: Publish SonarCloud Analysis
     inputs:
       pollingTimeoutSec: "300"
   - task: NuGetAuthenticate@0
+    displayName: Authenticate with NuGet
     inputs:
       nuGetServiceConnections: "sql-generator NuGet Connection"
   # - task: NuGetCommand@2
@@ -70,6 +76,7 @@ steps:
   #     nuGetFeedType: "external"
   #     publishFeedCredentials: "sql-generator NuGet Connection"
   - task: DotNetCoreCLI@2
+    displayName: Push NuGet Package to NuGet
     inputs:
       command: "push"
       packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg"

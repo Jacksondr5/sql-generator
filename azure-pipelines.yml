@@ -65,10 +65,10 @@ steps:
     displayName: Publish SonarCloud Analysis
     inputs:
       pollingTimeoutSec: "300"
-  - task: NuGetAuthenticate@0
-    displayName: Authenticate with NuGet
-    inputs:
-      nuGetServiceConnections: "sql-generator NuGet Connection"
+  # - task: NuGetAuthenticate@0
+  #   displayName: Authenticate with NuGet
+  #   inputs:
+  #     nuGetServiceConnections: "sql-generator NuGet Connection"
   # - task: NuGetCommand@2
   #   inputs:
   #     command: "push"

@@ -78,7 +78,9 @@ steps:
   - task: DotNetCoreCLI@2
     displayName: Push NuGet Package to NuGet
     inputs:
-      command: "push"
-      packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg"
-      nuGetFeedType: "external"
-      publishFeedCredentials: "sql-generator NuGet Connection"
+      command: "custom"
+      custom: "nuget"
+      arguments: >
+        push $(Build.ArtifactStagingDirectory)/*.nupkg
+        -s https://api.nuget.org/v3/index.json
+        -k $(NugetApiKey)

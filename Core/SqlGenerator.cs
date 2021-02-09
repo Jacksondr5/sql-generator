@@ -143,11 +143,8 @@ namespace Core
             };
         }
 
-        private static string GetColumnDefinition(PropertyInfo property)
-        {
-            var nullDefiniton = property.IsNullable ? "NULL" : "NOT NULL";
-            return $"\t{property.SqlName} {property.SqlType} {nullDefiniton},";
-        }
+        private static string GetColumnDefinition(PropertyInfo property) =>
+            $"\t{property.SqlName} {property.SqlType},";
 
         private static string GetProcedureStart(
             string procedureName,

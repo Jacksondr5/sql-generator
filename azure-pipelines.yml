@@ -60,22 +60,13 @@ steps:
       nobuild: true
       versioningScheme: "byBuildNumber"
       verbosityPack: "Normal"
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
   - task: SonarCloudAnalyze@1
     displayName: Run SonarCloud Analysis
   - task: SonarCloudPublish@1
     displayName: Publish SonarCloud Analysis
     inputs:
       pollingTimeoutSec: "300"
-  # - task: NuGetAuthenticate@0
-  #   displayName: Authenticate with NuGet
-  #   inputs:
-  #     nuGetServiceConnections: "sql-generator NuGet Connection"
-  # - task: NuGetCommand@2
-  #   inputs:
-  #     command: "push"
-  #     packagesToPush: "$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg"
-  #     nuGetFeedType: "external"
-  #     publishFeedCredentials: "sql-generator NuGet Connection"
   - task: DotNetCoreCLI@2
     displayName: Push NuGet Package to NuGet
     inputs:
@@ -85,3 +76,4 @@ steps:
         push $(Build.ArtifactStagingDirectory)\*.nupkg
         -s https://api.nuget.org/v3/index.json
         -k $(NugetApiKey)
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')

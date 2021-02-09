@@ -60,7 +60,6 @@ steps:
       nobuild: true
       versioningScheme: "byBuildNumber"
       verbosityPack: "Normal"
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
   - task: SonarCloudAnalyze@1
     displayName: Run SonarCloud Analysis
   - task: SonarCloudPublish@1

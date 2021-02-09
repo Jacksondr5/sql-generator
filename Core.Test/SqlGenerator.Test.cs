@@ -22,21 +22,21 @@ namespace Core.Test
                     ValidType = ValidType.Int,
                     IsIdProperty = true,
                     SqlName = "test_class_id",
-                    SqlType = "INT"
+                    SqlType = "INT NOT NULL"
                 },
                 new PropertyInfo
                 {
                     CSharpName = "AnotherTestProperty",
                     ValidType = ValidType.Int,
                     SqlName = "another_test_property",
-                    SqlType = "INT"
+                    SqlType = "INT NOT NULL"
                 },
                 new PropertyInfo
                 {
                     CSharpName = "TestProperty",
                     ValidType = ValidType.String,
                     SqlName = "test_property",
-                    SqlType = "VARCHAR(128)"
+                    SqlType = "VARCHAR(128) NOT NULL"
                 },
             },
             SqlTableName = "test_class"
@@ -281,13 +281,13 @@ namespace Core.Test
             var builder = new StringBuilder();
             builder.Append($"CREATE TABLE {_simpleInfo.SqlTableName} ({_nl}");
             builder.Append(
-                $"\t{idProperty.SqlName} {idProperty.SqlType} NOT NULL,{_nl}"
+                $"\t{idProperty.SqlName} {idProperty.SqlType},{_nl}"
             );
             builder.Append(
-                $"\t{_simpleInfo.Properties[1].SqlName} {_simpleInfo.Properties[1].SqlType} NOT NULL,{_nl}"
+                $"\t{_simpleInfo.Properties[1].SqlName} {_simpleInfo.Properties[1].SqlType},{_nl}"
             );
             builder.Append(
-                $"\t{_simpleInfo.Properties[2].SqlName} {_simpleInfo.Properties[2].SqlType} NOT NULL,{_nl}"
+                $"\t{_simpleInfo.Properties[2].SqlName} {_simpleInfo.Properties[2].SqlType},{_nl}"
             );
             builder.Append(
                 $"\tCONSTRAINT pk_{_simpleInfo.SqlTableName} PRIMARY KEY ({idProperty.SqlName}){_nl}"
@@ -322,7 +322,7 @@ namespace Core.Test
                     ValidType = ValidType.Int,
                     IsIdProperty = true,
                     SqlName = "another_test_id_property",
-                    SqlType = "INT"
+                    SqlType = "INT NOT NULL"
                 },
                 new PropertyInfo
                 {
@@ -330,14 +330,14 @@ namespace Core.Test
                     ValidType = ValidType.Int,
                     IsIdProperty = true,
                     SqlName = "test_id_property",
-                    SqlType = "INT"
+                    SqlType = "INT NOT NULL"
                 },
                 new PropertyInfo
                 {
                     CSharpName = "TestProperty",
                     ValidType = ValidType.String,
                     SqlName = "test_property",
-                    SqlType = "VARCHAR(128)"
+                    SqlType = "VARCHAR(128) NOT NULL"
                 },
             },
             SqlTableName = "test_class"
@@ -532,13 +532,13 @@ namespace Core.Test
                 _multipleIdsInfo.Properties.Where(x => x.IsIdProperty).ToList();
             var builder = new StringBuilder();
             builder.Append(
-                $"\t{idProperties[0].SqlName} {idProperties[0].SqlType} NOT NULL,{_nl}"
+                $"\t{idProperties[0].SqlName} {idProperties[0].SqlType},{_nl}"
             );
             builder.Append(
-                $"\t{idProperties[1].SqlName} {idProperties[1].SqlType} NOT NULL,{_nl}"
+                $"\t{idProperties[1].SqlName} {idProperties[1].SqlType},{_nl}"
             );
             builder.Append(
-                $"\t{_multipleIdsInfo.Properties[2].SqlName} {_multipleIdsInfo.Properties[2].SqlType} NOT NULL,{_nl}"
+                $"\t{_multipleIdsInfo.Properties[2].SqlName} {_multipleIdsInfo.Properties[2].SqlType},{_nl}"
             );
             builder.Append(
                 $"\tCONSTRAINT pk_{_multipleIdsInfo.SqlTableName} PRIMARY KEY ({idProperties[0].SqlName}, {idProperties[1].SqlName})"
@@ -577,7 +577,7 @@ namespace Core.Test
                         ValidType = ValidType.Int,
                         IsNullable = true,
                         SqlName = "test_property",
-                        SqlType = "INT"
+                        SqlType = "INT NULL"
                     },
                 },
                 SqlTableName = "test_class"
@@ -616,7 +616,7 @@ namespace Core.Test
                         ValidType = ValidType.Int,
                         IsNullable = false,
                         SqlName = "test_property",
-                        SqlType = "INT"
+                        SqlType = "INT NOT NULL"
                     },
                 },
                 SqlTableName = "test_class"
